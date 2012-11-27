@@ -1,0 +1,15 @@
+{
+  "name": "llvm",
+  "version": "0.0.0",
+  "description": "Bindings for the LLVM compiler infrastructure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "bindings": "~1.0.0"
+  }
+}
