@@ -59,3 +59,7 @@ public:
 	HandleScope scope;                \
 	CHECK_N_ARGS(MIN_ARGS);           \
 	auto self = PROTO.unwrap(args.This());
+
+#define UNWRAP_ARG(PROTO, NAME, ARGNO)     \
+	auto NAME = PROTO.unwrap(args[ARGNO]); \
+	if (!NAME) THROW_BAD_ARGS("Parameter " #NAME " (" #ARGNO ") is of incorrec type")

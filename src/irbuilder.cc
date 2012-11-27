@@ -1,5 +1,10 @@
 #include "node-llvm.h"
 
+// helper for createX methods
+#define UNWRAP_NAME(N) \
+	llvm::Twine name;  \
+	if (args.Length() > N-1) name = *String::Utf8Value(args[N]->ToString());
+
 class jsIRBuilder{
 	// http://llvm.org/doxygen/classllvm_1_1IRBuilder.html
 public:
@@ -103,7 +108,8 @@ public:
 	static Handle<Value> createIRB(const Arguments& args){
 		HandleScope scope;
 		CHECK_N_ARGS(1);
-		IRBuilder* b = new IRBuilder(*pContext.unwrap(args[0]));
+		UNWRAP_ARG(pContext, context, 0);
+		IRBuilder* b = new IRBuilder(*context);
 		return scope.Close(pIRBuilder.create(b, args[0]));
 	}
 
@@ -114,27 +120,19 @@ public:
 
 	static Handle<Value> setInsertPoint(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 1);
-		llvm::BasicBlock* p = pBasicBlock.unwrap(args[1]);
+		UNWRAP_ARG(pBasicBlock, p, 0);
 		// TODO: could also be Instruction
 		self->SetInsertPoint(p);
 		return args[1];
-	}
-
-
-
-	static const char* nameValue(Handle<Value> arg){
-		return *String::Utf8Value(arg->ToString());
 	}
 
 	typedef llvm::Value* (IRBuilder::*UnaryOpFn)(llvm::Value*, const llvm::Twine&);
 	template<UnaryOpFn method>
 	static Handle<Value> UnaryOpMethod(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 1);
+		UNWRAP_ARG(pValue, v, 0);
+		UNWRAP_NAME(1);
 
-		llvm::Twine name;
-		if (args.Length() > 1) name = nameValue(args[1]);
-
-		llvm::Value* v = pValue.unwrap(args[0]);
 		return scope.Close(pValue.create((self->*method)(v, name), args.This()));
 	}
 
@@ -142,12 +140,10 @@ public:
 	template<BinaryOpFn method>
 	static Handle<Value> BinOpMethod(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, l, 0);
+		UNWRAP_ARG(pValue, r, 1);
+		UNWRAP_NAME(2);
 
-		llvm::Twine name;
-		if (args.Length() > 2) name = nameValue(args[2]);
-
-		llvm::Value* l = pValue.unwrap(args[0]);
-		llvm::Value* r = pValue.unwrap(args[1]);
 		return scope.Close(pValue.create((self->*method)(l, r, name), args.This()));
 	}
 };
