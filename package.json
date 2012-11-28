@@ -4,7 +4,8 @@
   "description": "Bindings for the LLVM compiler infrastructure",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers coffee:coffee-script"
+    "test": "mocha --compilers coffee:coffee-script",
+    "valgrind": "valgrind --leak-check=full --show-possibly-lost=no node --expose-gc --trace-gc node_modules/mocha/bin/_mocha -R spec --compilers coffee:coffee-script"
   },
   "repository": "https://github.com/kevinmehall/node-llvm.git",
   "author": "Kevin Mehall <km@kevinmehall.net>, Nonolith Labs, LLC",

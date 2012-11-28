@@ -1,6 +1,10 @@
 llvm = require('../index')
 assert = require('assert')
 
+if typeof gc is 'function'
+	# running with --expose-gc, do a sweep between tests so valgrind blames the right one
+	afterEach -> gc()
+
 describe "llvm", ->
 	it "has globalContext", ->
 		assert llvm.globalContext instanceof llvm.Context
