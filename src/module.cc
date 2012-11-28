@@ -4,8 +4,9 @@ static Handle<Value> ModuleConstructor(const Arguments& args){
 	ENTER_CONSTRUCTOR(2);
 	STRING_ARG(name, 0);
 	UNWRAP_ARG(pContext, context, 1);
+	setConst(args.This(), "context", args[1]);
 
-	pModule.wrap(args.This(), new llvm::Module(name, *context), args[1]);
+	pModule.wrap(args.This(), new llvm::Module(name, *context));
 
 	return scope.Close(args.This());
 }
@@ -26,7 +27,7 @@ static Handle<Value> getOrInsertFunction(const Arguments& args){
 	STRING_ARG(name, 0);
 	UNWRAP_ARG(pFunctionType, type, 1);
 	auto fn = static_cast<llvm::Function*>(self->getOrInsertFunction(name, type));
-	return scope.Close(pFunction.create(fn, args.This()));
+	return scope.Close(pFunction.create(fn, args.This(), args[1]));
 }
 
 static Handle<Value> dump(const Arguments& args){
@@ -59,4 +60,4 @@ static void init(Handle<Object> target){
 	pModule.addToModule(target);
 }
 
-Proto<llvm::Module> pModule("Module", &init, "context");
+Proto<llvm::Module> pModule("Module", &init);

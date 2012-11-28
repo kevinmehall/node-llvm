@@ -1,5 +1,10 @@
 #include "node-llvm.h"
 
+static Handle<Value> contextConstructor(const Arguments& args){
+	ENTER_CONSTRUCTOR_POINTER(pContext, 2);
+	return scope.Close(args.This());
+}
+
 static Handle<Value> getFunctionType(const Arguments& args){
 	ENTER_METHOD(pContext, 2);
 	(void) self;
@@ -24,7 +29,7 @@ static Handle<Value> getDouble(const Arguments& args){
 }
 
 static void init(Handle<Object> target){
-	pContext.init();
+	pContext.init(&contextConstructor);
 	pContext.addMethod("getFunctionType", &getFunctionType);
 	pContext.addMethod("getDoubleTy", &getDoubleTy);
 	pContext.addMethod("getDouble", &getDouble);

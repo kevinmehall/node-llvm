@@ -54,6 +54,11 @@ describe "Function", ->
 		assert.equal args.length, 1
 		assert args[0] instanceof llvm.Value
 
+	it "has a functionType", ->
+		assert fn.functionType instanceof llvm.FunctionType
+		# getFunction makes a new FunctionType wrapper
+		assert m.getFunction('foo').functionType instanceof llvm.FunctionType
+
 describe "IRBuilder", ->
 	it "can build a function", ->
 		ctx = llvm.globalContext

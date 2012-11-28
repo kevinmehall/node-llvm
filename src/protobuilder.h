@@ -18,13 +18,11 @@ public:
 		}
 	}
 
-	ProtoBuilder(const char *_name, ProtoBuilder::InitFn initfn=NULL, const char* parentProp=NULL):
-		name(_name), parentProperty(parentProp){
-		
+	ProtoBuilder(const char *_name, ProtoBuilder::InitFn initfn=NULL):name(_name){
 		if (initfn) ProtoBuilder::initFns.push_back(initfn);
 	}
 
-	void init(InvocationCallback constructor=&DefaultConstructor){
+	void init(InvocationCallback constructor){
 		tpl = Persistent<FunctionTemplate>::New(FunctionTemplate::New(constructor));
 		tpl->InstanceTemplate()->SetInternalFieldCount(1);
 		tpl->SetClassName(String::NewSymbol(name));
@@ -54,18 +52,8 @@ public:
 		tpl->InstanceTemplate()->SetAccessor(String::NewSymbol(name), getter, setter);
 	}
 
-	static Handle<Value> DefaultConstructor(const Arguments& args){
-		if (!args.Length() || !args[0]->IsExternal()){
-			THROW_BAD_ARGS("This type cannot be created directly!");
-		}else{
-			// called by Proto.create(), which will set the hidden field
-			return args.This();
-		}
-	}
-
 	Persistent<FunctionTemplate> tpl;
 	const char* const name;
-	const char* const parentProperty;
 };
 
 template <class T>
@@ -73,22 +61,18 @@ class Proto : public ProtoBuilder{
 public:
 	typedef T wrappedType;
 
-	Proto(const char *_name, ProtoBuilder::InitFn initfn=NULL, const char* parentProp=NULL):
-		ProtoBuilder(_name, initfn, parentProp){}
+	Proto(const char *_name, ProtoBuilder::InitFn initfn=NULL):
+		ProtoBuilder(_name, initfn){}
 
-	Handle<Value> create(T* v, Handle<Value> parent){
+	Handle<Value> create(T* v, Handle<Value> arg1 = Undefined(), Handle<Value> arg2 = Undefined()){
 		if (!v) return Undefined();
-		Handle<Value> args[1] = {External::New(NULL)};
-		Handle<Object> o = tpl->GetFunction()->NewInstance(1, args);
-		wrap(o, v, parent);
+		Handle<Value> args[3] = {External::New(v), arg1, arg2};
+		Handle<Object> o = tpl->GetFunction()->NewInstance(3, args);
 		return o;
 	}
 
-	void wrap(Handle<Object> obj, T* v, Handle<Value> parent){
+	void wrap(Handle<Object> obj, T* v){
 		obj->SetPointerInInternalField(0, v);
-		if (parentProperty){
-			obj->Set(String::NewSymbol(parentProperty), parent, CONST_PROP);
-		}
 	}
 
 	T* unwrap(Handle<Value> handle){
@@ -100,15 +84,30 @@ public:
 	}
 };
 
+inline static void setConst(Handle<Object> obj, const char* const name, Handle<Value> value){
+	obj->Set(String::NewSymbol(name), value, CONST_PROP);
+}
+
 #define ENTER_CONSTRUCTOR(MIN_ARGS) \
 	HandleScope scope;              \
 	if (!args.IsConstructCall()) THROW_ERROR("Must be called with `new`!"); \
 	CHECK_N_ARGS(MIN_ARGS);
 
+#define ENTER_CONSTRUCTOR_POINTER(PROTO, MIN_ARGS) \
+	ENTER_CONSTRUCTOR(MIN_ARGS)             \
+	if (!args.Length() || !args[0]->IsExternal()){ \
+		THROW_BAD_ARGS("This type cannot be created directly!"); \
+	}else{ \
+		args.This()->SetInternalField(0, args[0]); \
+	} \
+	auto self = PROTO.unwrap(args.This()); \
+	(void) self \
+
 #define ENTER_METHOD(PROTO, MIN_ARGS) \
 	HandleScope scope;                \
 	CHECK_N_ARGS(MIN_ARGS);           \
-	auto self = PROTO.unwrap(args.This());
+	auto self = PROTO.unwrap(args.This()); \
+	(void) self
 
 #define ENTER_ACCESSOR(PROTO) \
 		HandleScope scope;                \

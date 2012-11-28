@@ -105,8 +105,9 @@ public:
 		ENTER_CONSTRUCTOR(1);
 		CHECK_N_ARGS(1);
 		UNWRAP_ARG(pContext, context, 0);
+		setConst(args.This(), "context", args[0]);
 		IRBuilder* b = new IRBuilder(*context);
-		pIRBuilder.wrap(args.This(), b, args[0]);
+		pIRBuilder.wrap(args.This(), b);
 		return scope.Close(args.This());
 	}
 
@@ -155,4 +156,4 @@ public:
 		return scope.Close(pValue.create((self->*method)(l, r, name), args.This()));
 	}
 };
-Proto<IRBuilder> pIRBuilder("IRBuilder", &jsIRBuilder::init, "parent");
+Proto<IRBuilder> pIRBuilder("IRBuilder", &jsIRBuilder::init);
