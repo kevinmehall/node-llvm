@@ -4,9 +4,7 @@ class jsIRBuilder{
 	// http://llvm.org/doxygen/classllvm_1_1IRBuilder.html
 public:
 	static void init(Handle<Object> target){
-		pIRBuilder.init();
-
-		pIRBuilder.addStaticMethod("create", &createIRB);
+		pIRBuilder.init(&IRBConstructor);
 
 		pIRBuilder.addMethod("getInsertBlock", &getInsertBlock);
 		pIRBuilder.addMethod("setInsertPoint", &setInsertPoint);
@@ -103,12 +101,13 @@ public:
 
 	}
 
-	static Handle<Value> createIRB(const Arguments& args){
-		HandleScope scope;
+	static Handle<Value> IRBConstructor(const Arguments& args){
+		ENTER_CONSTRUCTOR(1);
 		CHECK_N_ARGS(1);
 		UNWRAP_ARG(pContext, context, 0);
 		IRBuilder* b = new IRBuilder(*context);
-		return scope.Close(pIRBuilder.create(b, args[0]));
+		pIRBuilder.wrap(args.This(), b, args[0]);
+		return scope.Close(args.This());
 	}
 
 	static Handle<Value> getInsertBlock(const Arguments& args){

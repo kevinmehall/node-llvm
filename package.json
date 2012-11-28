@@ -4,12 +4,16 @@
   "description": "Bindings for the LLVM compiler infrastructure",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --compilers coffee:coffee-script"
   },
-  "repository": "",
-  "author": "",
+  "repository": "https://github.com/kevinmehall/node-llvm.git",
+  "author": "Kevin Mehall <km@kevinmehall.net>, Nonolith Labs, LLC",
   "license": "BSD",
   "dependencies": {
     "bindings": "~1.0.0"
+  },
+  "devDependencies": {
+    "coffee-script": "~1.4.0",
+    "mocha": "~1.7.1"
   }
 }

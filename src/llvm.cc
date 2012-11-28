@@ -2,18 +2,13 @@
 
 extern ProtoBuilder::InitFnList ProtoBuilder::initFns;
 
-Handle<Value> getGlobalContext(const Arguments& args){
-	HandleScope scope;
-	return scope.Close(pContext.create(&llvm::getGlobalContext(), Undefined()));
-}
-
 extern "C" void Initialize(Handle<Object> target) {
 	HandleScope  scope;
 
 	ProtoBuilder::initAll(target);
 
-	Local<FunctionTemplate> f = FunctionTemplate::New(&getGlobalContext);
-	target->Set(String::NewSymbol("getGlobalContext"), f->GetFunction());
+	auto globalContext = pContext.create(&llvm::getGlobalContext(), Undefined());
+	target->Set(String::NewSymbol("globalContext"), globalContext, CONST_PROP);
 }
 
 NODE_MODULE(llvm, Initialize)

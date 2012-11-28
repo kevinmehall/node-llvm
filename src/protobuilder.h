@@ -4,7 +4,7 @@
 #define THROW_ERROR(FAIL_MSG) return ThrowException(Exception::Error(String::New(FAIL_MSG)));
 #define CHECK_N_ARGS(MIN_ARGS) if (args.Length() < MIN_ARGS) THROW_BAD_ARGS("Expected " #MIN_ARGS " arguments")
 
-#include <iostream>
+const PropertyAttribute CONST_PROP = static_cast<PropertyAttribute>(ReadOnly|DontDelete);
 
 class ProtoBuilder{
 public:
@@ -87,7 +87,7 @@ public:
 	void wrap(Handle<Object> obj, T* v, Handle<Value> parent){
 		obj->SetPointerInInternalField(0, v);
 		if (parentProperty){
-			obj->Set(String::NewSymbol(parentProperty), parent); // TODO: immutable
+			obj->Set(String::NewSymbol(parentProperty), parent, CONST_PROP);
 		}
 	}
 
