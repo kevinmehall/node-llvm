@@ -13,6 +13,8 @@ using namespace v8;
 #include "llvm/Module.h"
 #include "llvm/Support/IRBuilder.h"
 #include "llvm/BasicBlock.h"
+#include "llvm/Function.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "protobuilder.h"
 
@@ -23,10 +25,10 @@ extern Proto<llvm::Module>      pModule;
 extern Proto<llvm::BasicBlock>  pBasicBlock;
 extern Proto<llvm::Value>       pValue;
 extern Proto<IRBuilder>         pIRBuilder;
+extern Proto<llvm::Function>    pFunction;
+extern Proto<llvm::Type> 		pType;
+extern Proto<llvm::FunctionType> pFunctionType;
 
-// FunctionType
-// Function
-// BasicBlock
 // ConstantInt / ConstantFP
 
 // Type

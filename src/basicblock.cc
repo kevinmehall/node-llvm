@@ -1,10 +1,9 @@
 #include "node-llvm.h"
 
-class jsBasicBlock{
-public:
-	static void init(Handle<Object> target){
-		pBasicBlock.init(target);
-	}
+static void init(Handle<Object> target){
+	pBasicBlock.init();
 
-};
-Proto<llvm::BasicBlock> pBasicBlock("BasicBlock", &jsBasicBlock::init, "func");
+	pBasicBlock.addToModule(target);
+}
+
+Proto<llvm::BasicBlock> pBasicBlock("BasicBlock", &init, "func");

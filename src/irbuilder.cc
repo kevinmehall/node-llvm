@@ -1,25 +1,20 @@
 #include "node-llvm.h"
 
-// helper for createX methods
-#define UNWRAP_NAME(N) \
-	llvm::Twine name;  \
-	if (args.Length() > N-1) name = *String::Utf8Value(args[N]->ToString());
-
 class jsIRBuilder{
 	// http://llvm.org/doxygen/classllvm_1_1IRBuilder.html
 public:
 	static void init(Handle<Object> target){
-		pIRBuilder.init(target);
+		pIRBuilder.init();
 
 		pIRBuilder.addStaticMethod("create", &createIRB);
 
 		pIRBuilder.addMethod("getInsertBlock", &getInsertBlock);
 		pIRBuilder.addMethod("setInsertPoint", &setInsertPoint);
 
-		/*
+		
 		pIRBuilder.addMethod("createRet", &createRet);
 		pIRBuilder.addMethod("createRetVoid", &createRetVoid);
-		pIRBuilder.addMethod("createAggregateRet", &createAggregateRet);
+		/*pIRBuilder.addMethod("createAggregateRet", &createAggregateRet);
 
 		pIRBuilder.addMethod("createBr", &createRetVoid);
 		pIRBuilder.addMethod("createCondBr", &createCondBr);
@@ -103,6 +98,9 @@ public:
 		// TODO: there are more (CmpXXX)
 
 		// TODO: cast (Value*, Type*) functions
+
+		pIRBuilder.addToModule(target);
+
 	}
 
 	static Handle<Value> createIRB(const Arguments& args){
@@ -126,12 +124,23 @@ public:
 		return args[1];
 	}
 
+	static Handle<Value> createRet(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 1);
+		UNWRAP_ARG(pValue, v, 0);
+		return scope.Close(pValue.create(self->CreateRet(v), args.This()));
+	}
+
+	static Handle<Value> createRetVoid(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 0);
+		return scope.Close(pValue.create(self->CreateRetVoid(), args.This()));
+	}
+
 	typedef llvm::Value* (IRBuilder::*UnaryOpFn)(llvm::Value*, const llvm::Twine&);
 	template<UnaryOpFn method>
 	static Handle<Value> UnaryOpMethod(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 1);
 		UNWRAP_ARG(pValue, v, 0);
-		UNWRAP_NAME(1);
+		STRING_ARG(name, 1);
 
 		return scope.Close(pValue.create((self->*method)(v, name), args.This()));
 	}
@@ -142,7 +151,7 @@ public:
 		ENTER_METHOD(pIRBuilder, 2);
 		UNWRAP_ARG(pValue, l, 0);
 		UNWRAP_ARG(pValue, r, 1);
-		UNWRAP_NAME(2);
+		STRING_ARG(name, 2);
 
 		return scope.Close(pValue.create((self->*method)(l, r, name), args.This()));
 	}

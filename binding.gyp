@@ -12,6 +12,9 @@
         './src/irbuilder.cc',
         './src/module.cc',
         './src/value.cc',
+        './src/function.cc',
+        './src/type.cc',
+        './src/functiontype.cc',
       ],
       'cflags': [
         '-O3',
