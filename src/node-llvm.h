@@ -36,7 +36,6 @@ extern Proto<llvm::FunctionPassManager> pFunctionPassManager;
 
 // ConstantInt / ConstantFP
 
-// Type
 // Instruction
 //	PHINode
 //	SwitchInstruction

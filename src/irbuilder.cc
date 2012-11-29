@@ -6,10 +6,8 @@ public:
 	static void init(Handle<Object> target){
 		pIRBuilder.init(&IRBConstructor);
 
-		pIRBuilder.addMethod("getInsertBlock", &getInsertBlock);
 		pIRBuilder.addMethod("setInsertPoint", &setInsertPoint);
 
-		
 		pIRBuilder.addMethod("createRet", &createRet);
 		pIRBuilder.addMethod("createRetVoid", &createRetVoid);
 		/*pIRBuilder.addMethod("createAggregateRet", &createAggregateRet);
@@ -103,33 +101,32 @@ public:
 		CHECK_N_ARGS(1);
 		UNWRAP_ARG(pContext, context, 0);
 		setConst(args.This(), "context", args[0]);
+		setConst(args.This(), "insertBlock", Undefined());
 		IRBuilder* b = new IRBuilder(*context);
 		pIRBuilder.wrap(args.This(), b);
 		return scope.Close(args.This());
 	}
 
-	static Handle<Value> getInsertBlock(const Arguments& args){
-		ENTER_METHOD(pIRBuilder, 0);
-		return scope.Close(pBasicBlock.create(self->GetInsertBlock(), args.This()));
-	}
-
 	static Handle<Value> setInsertPoint(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 1);
-		UNWRAP_ARG(pBasicBlock, p, 0);
-		// TODO: could also be Instruction
+		UNWRAP_ARG(pBasicBlock, p, 0); // TODO: could also be Instruction
+		setConst(args.This(), "insertBlock", args[0]);
 		self->SetInsertPoint(p);
 		return args[1];
 	}
 
+	#define RETURN_INSTR(TP, VAL) \
+		return scope.Close(TP.create(VAL, args.This()->Get(String::NewSymbol("insertBlock"))));
+
 	static Handle<Value> createRet(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 1);
 		UNWRAP_ARG(pValue, v, 0);
-		return scope.Close(pValue.create(self->CreateRet(v), args.This()));
+		RETURN_INSTR(pValue, self->CreateRet(v));
 	}
 
 	static Handle<Value> createRetVoid(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 0);
-		return scope.Close(pValue.create(self->CreateRetVoid(), args.This()));
+		RETURN_INSTR(pValue, self->CreateRetVoid());
 	}
 
 	typedef llvm::Value* (IRBuilder::*UnaryOpFn)(llvm::Value*, const llvm::Twine&);
@@ -139,7 +136,7 @@ public:
 		UNWRAP_ARG(pValue, v, 0);
 		STRING_ARG(name, 1);
 
-		return scope.Close(pValue.create((self->*method)(v, name), args.This()));
+		RETURN_INSTR(pValue, (self->*method)(v, name));
 	}
 
 	typedef llvm::Value* (IRBuilder::*BinaryOpFn)(llvm::Value*, llvm::Value*, const llvm::Twine&);
@@ -149,8 +146,7 @@ public:
 		UNWRAP_ARG(pValue, l, 0);
 		UNWRAP_ARG(pValue, r, 1);
 		STRING_ARG(name, 2);
-
-		return scope.Close(pValue.create((self->*method)(l, r, name), args.This()));
+		RETURN_INSTR(pValue, (self->*method)(l, r, name));
 	}
 };
 Proto<IRBuilder> pIRBuilder("IRBuilder", &jsIRBuilder::init);
