@@ -15,6 +15,8 @@
         './src/function.cc',
         './src/type.cc',
         './src/functiontype.cc',
+        './src/executionengine.cc',
+        './src/functionpassmanager.cc',
       ],
       'cflags': [
         '-O3',
@@ -25,7 +27,8 @@
         '-O3',
         '-Wall',
         '-Werror',
-        '-std=c++0x'
+        '-std=c++0x',
+        '-g',
       ],      
       'defines': [
         "__STDC_LIMIT_MACROS=1",

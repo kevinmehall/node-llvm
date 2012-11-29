@@ -93,3 +93,13 @@ describe "IRBuilder", ->
 
 		"""
 
+		engine = new llvm.ExecutionEngine(m)
+		pm = new llvm.FunctionPassManager(m)
+
+		pm.addTargetDataPass('')
+		pm.addBasicAliasAnalysisPass()
+		pm.doInitialization()
+		pm.run(fn)
+		
+		fnWrapped = engine.getFFIFunction(fn)
+		assert.equal fnWrapped(10), 15

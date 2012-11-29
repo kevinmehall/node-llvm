@@ -14,6 +14,8 @@ using namespace v8;
 #include "llvm/Support/IRBuilder.h"
 #include "llvm/BasicBlock.h"
 #include "llvm/Function.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/PassManager.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include "protobuilder.h"
@@ -28,15 +30,13 @@ extern Proto<IRBuilder>         pIRBuilder;
 extern Proto<llvm::Function>    pFunction;
 extern Proto<llvm::Type> 		pType;
 extern Proto<llvm::FunctionType> pFunctionType;
+extern Proto<llvm::ExecutionEngine> pExecutionEngine;
+extern Proto<llvm::FunctionPassManager> pFunctionPassManager;
+
 
 // ConstantInt / ConstantFP
 
 // Type
-// PassManager
-// FunctionPassManager
-
-// ExecutionEngine
-
 // Instruction
 //	PHINode
 //	SwitchInstruction

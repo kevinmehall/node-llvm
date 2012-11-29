@@ -14,3 +14,6 @@ Supported APIs
 	- Value
 	- BasicBlock: minimal
 	- IRBuilder: minimal
+	- FunctionPassManager
+		- note: instead of .add()'ing Pass objects from CreateXYZPass(), use fpm.addXYZPass() to create and add
+	- ExecutionEngine
