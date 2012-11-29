@@ -33,7 +33,6 @@ static void init(Handle<Object> target){
 	pContext.addMethod("getFunctionType", &getFunctionType);
 	pContext.addMethod("getDoubleTy", &getDoubleTy);
 	pContext.addMethod("getDouble", &getDouble);
-	pContext.addToModule(target);
 }
 
 

@@ -24,8 +24,8 @@ typedef llvm::IRBuilder<> IRBuilder; // just so I don't keep forgetting the <>
 
 extern Proto<llvm::LLVMContext> pContext;
 extern Proto<llvm::Module>      pModule;
-extern Proto<llvm::BasicBlock>  pBasicBlock;
 extern Proto<llvm::Value>       pValue;
+extern Proto<llvm::BasicBlock>  pBasicBlock;
 extern Proto<IRBuilder>         pIRBuilder;
 extern Proto<llvm::Function>    pFunction;
 extern Proto<llvm::Type> 		pType;

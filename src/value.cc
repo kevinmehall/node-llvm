@@ -21,8 +21,6 @@ static void init(Handle<Object> target){
 	pValue.init(&valueConstructor);
 
 	pValue.addAccessor("name", &getValueName, &setValueName);
-
-	pValue.addToModule(target);
 }
 
 Proto<llvm::Value> pValue("Value", &init);

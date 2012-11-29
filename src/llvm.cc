@@ -1,7 +1,7 @@
 #include "node-llvm.h"
 #include "llvm/Support/TargetSelect.h"
 
-extern ProtoBuilder::InitFnList ProtoBuilder::initFns;
+extern ProtoBuilder::ProtoList ProtoBuilder::initProto;
 
 static Handle<Value> initializeNativeTarget(const Arguments& args){
 	llvm::InitializeNativeTarget();

@@ -56,8 +56,6 @@ static void init(Handle<Object> target){
 //	pModule.addMethod("getFunctionList")
 
 	pModule.addMethod("dump", &dump);
-
-	pModule.addToModule(target);
 }
 
 Proto<llvm::Module> pModule("Module", &init);

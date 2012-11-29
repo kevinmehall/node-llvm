@@ -36,7 +36,6 @@ static void init(Handle<Object> target){
 
 	pFunction.addMethod("addBasicBlock", &addBasicBlock);
 
-	pFunction.addToModule(target);
 }
 
 Proto<llvm::Function> pFunction("Function", &init);

@@ -47,8 +47,6 @@ static void init(Handle<Object> target){
 	pExecutionEngine.init(&EEConstructor);
 
 	pExecutionEngine.addMethod("getPointerToFunction", &getPointerToFunction);
-
-	pExecutionEngine.addToModule(target);
 }
 
 Proto<llvm::ExecutionEngine> pExecutionEngine("ExecutionEngine", &init);

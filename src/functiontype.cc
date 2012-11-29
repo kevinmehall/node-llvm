@@ -9,7 +9,6 @@ static Handle<Value> functionTypeConstructor(const Arguments& args){
 static void init(Handle<Object> target){
 	pFunctionType.init(&functionTypeConstructor);
 	pFunctionType.inherit(pType);
-	pFunctionType.addToModule(target);
 }
 
 Proto<llvm::FunctionType> pFunctionType("FunctionType", &init);

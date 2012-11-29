@@ -96,9 +96,6 @@ public:
 		// TODO: there are more (CmpXXX)
 
 		// TODO: cast (Value*, Type*) functions
-
-		pIRBuilder.addToModule(target);
-
 	}
 
 	static Handle<Value> IRBConstructor(const Arguments& args){

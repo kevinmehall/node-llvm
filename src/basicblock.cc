@@ -8,8 +8,6 @@ static Handle<Value> BBConstructor(const Arguments& args){
 
 static void init(Handle<Object> target){
 	pBasicBlock.init(&BBConstructor);
-
-	pBasicBlock.addToModule(target);
 }
 
 Proto<llvm::BasicBlock> pBasicBlock("BasicBlock", &init);

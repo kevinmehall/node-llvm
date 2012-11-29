@@ -9,22 +9,28 @@ const PropertyAttribute CONST_PROP = static_cast<PropertyAttribute>(ReadOnly|Don
 class ProtoBuilder{
 public:
 	typedef void (*InitFn)(Handle<Object> target);
-	typedef std::vector<InitFn> InitFnList;
-	static InitFnList initFns;
+	typedef std::vector<ProtoBuilder*> ProtoList;
+	static ProtoList initProto;
 
 	static void initAll(Handle<Object> target){
-		for (InitFnList::iterator it=initFns.begin() ; it < initFns.end(); it++ ){
-			(**it)(target);
+		for (auto it=initProto.begin() ; it < initProto.end(); it++ ){
+			if ((*it)->initFn) (*(*it)->initFn)(target);
+		}
+
+		for (auto it=initProto.begin() ; it < initProto.end(); it++ ){
+			(*it)->addToModule(target);
 		}
 	}
 
-	ProtoBuilder(const char *_name, ProtoBuilder::InitFn initfn=NULL):name(_name){
-		if (initfn) ProtoBuilder::initFns.push_back(initfn);
+	ProtoBuilder(const char *_name, ProtoBuilder::InitFn _initFn=NULL)
+		:name(_name), initFn(_initFn){
+		ProtoBuilder::initProto.push_back(this);
+		tpl = Persistent<FunctionTemplate>::New(FunctionTemplate::New());
+		tpl->InstanceTemplate()->SetInternalFieldCount(1);
 	}
 
 	void init(InvocationCallback constructor){
-		tpl = Persistent<FunctionTemplate>::New(FunctionTemplate::New(constructor));
-		tpl->InstanceTemplate()->SetInternalFieldCount(1);
+		tpl->SetCallHandler(constructor);
 		tpl->SetClassName(String::NewSymbol(name));
 	}
 
@@ -54,6 +60,7 @@ public:
 
 	Persistent<FunctionTemplate> tpl;
 	const char* const name;
+	const InitFn initFn;
 };
 
 template <class T>

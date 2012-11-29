@@ -8,7 +8,6 @@ static Handle<Value> typeConstructor(const Arguments& args){
 
 static void init(Handle<Object> target){
 	pType.init(&typeConstructor);
-	pType.addToModule(target);
 }
 
 Proto<llvm::Type> pType("Type", &init);
