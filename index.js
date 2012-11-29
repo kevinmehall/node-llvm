@@ -9,6 +9,13 @@ try{
 	ffi = null
 }
 
+llvm.Function.prototype.addBasicBlock = function (nameOrBlock){
+	if (typeof nameOrBlock == 'string'){
+		nameOrBlock = new llvm.BasicBlock(this.context, nameOrBlock);
+	}
+	return this._addBasicBlock(nameOrBlock);
+}
+
 llvm.ExecutionEngine.prototype.getFFIFunction = function(func){
 	if (!ffi) throw new Error("Couldn't load FFI module")
 	var ptr = this.getPointerToFunction(func);

@@ -71,6 +71,12 @@ public:
 	Proto(const char *_name, ProtoBuilder::InitFn initfn=NULL):
 		ProtoBuilder(_name, initfn){}
 
+	Handle<Object> create(Handle<Value> arg1 = Undefined(), Handle<Value> arg2 = Undefined()){
+		Handle<Value> args[2] = {arg1, arg2};
+		Handle<Object> o = tpl->GetFunction()->NewInstance(2, args);
+		return o;
+	}
+
 	Handle<Value> create(T* v, Handle<Value> arg1 = Undefined(), Handle<Value> arg2 = Undefined()){
 		if (!v) return Undefined();
 		Handle<Value> args[3] = {External::New(v), arg1, arg2};

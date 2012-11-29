@@ -63,6 +63,11 @@ describe "Function", ->
 		# getFunction makes a new FunctionType wrapper
 		assert m.getFunction('foo').functionType instanceof llvm.FunctionType
 
+describe "BasicBlock", ->
+	it "has a name (via Value)", ->
+		bb = new llvm.BasicBlock(llvm.globalContext, "bbName")
+		assert.equal bb.name, "bbName"
+
 describe "IRBuilder", ->
 	it "can build a function", ->
 		ctx = llvm.globalContext
