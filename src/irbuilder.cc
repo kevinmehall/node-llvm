@@ -15,24 +15,23 @@ public:
 		pIRBuilder.addMethod("createBr", &createBr);
 		pIRBuilder.addMethod("createCondBr", &createCondBr);
 		
-		/*pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
-		pIRBuilder.addMethod("createIndirectBr", &createIndirectBr);
+		//IRBuilder.addMethod("createSwitch", &createSwitch); // special type
+		//pIRBuilder.addMethod("createIndirectBr", &createIndirectBr);
 		
-		pIRBuilder.addMethod("createUnreachable", &createIndirectBr);
+		//pIRBuilder.addMethod("createUnreachable", &createIndirectBr);
 
-		pIRBuilder.addMethod("createInvoke", &createInvoke);
-		*/
+		//pIRBuilder.addMethod("createInvoke", &createInvoke);
 		pIRBuilder.addMethod("createCall", &createCall);
 		
-
 		pIRBuilder.addMethod("createAlloca", &createAlloca);
 		pIRBuilder.addMethod("createLoad", &createLoad); // + aligned, volatile
 		pIRBuilder.addMethod("createStore", &createStore); // + aligned, volatile
 
-		// TODO: GEP
-		pIRBuilder.addMethod("createPHI", &createPHI);
+		pIRBuilder.addMethod("createGEP", &createGEP);
 
-		// TODO: unary ops
+		pIRBuilder.addMethod("createPHI", &createPHI);
+		pIRBuilder.addMethod("createSelect", &createSelect);
+
 
 		// bool HasNUW=false, bool HasNSW=false
 		//pIRBuilder.addMethod("createAdd", 	&BinOpWrMethod<&IRBuilder::CreateAdd> );
@@ -90,6 +89,14 @@ public:
 		pIRBuilder.addMethod("createFCmpULE", &BinOpMethod<&IRBuilder::CreateFCmpULE> );
 		pIRBuilder.addMethod("createFCmpUNE", &BinOpMethod<&IRBuilder::CreateFCmpUNE> );
 
+//		pIRBuilder.addMethod("createNeg",       &UnaryOpMethod<&IRBuilder::CreateNeg> ); //  bool HasNUW=false, bool HasNSW=false)
+		pIRBuilder.addMethod("createNSWNeg",    &UnaryOpMethod<&IRBuilder::CreateNSWNeg> );
+		pIRBuilder.addMethod("createNUWNeg",    &UnaryOpMethod<&IRBuilder::CreateNUWNeg> );
+		pIRBuilder.addMethod("createFNeg",      &UnaryOpMethod<&IRBuilder::CreateFNeg> ); // MDNode *FPMathTag=0
+		pIRBuilder.addMethod("createNot",       &UnaryOpMethod<&IRBuilder::CreateNot> );
+		pIRBuilder.addMethod("createIsNull",    &UnaryOpMethod<&IRBuilder::CreateIsNull> );
+		pIRBuilder.addMethod("createIsNotNull", &UnaryOpMethod<&IRBuilder::CreateIsNotNull> );
+
 		//CreateICmp (CmpInst::Predicate P, Value *LHS, Value *RHS, const Twine &Name="")
 		//CreateFCmp (CmpInst::Predicate P, Value *LHS, Value *RHS, const Twine &Name="")
 		
@@ -114,7 +121,6 @@ public:
 		pIRBuilder.addMethod("createPointerCast", &CastOpMethod<&IRBuilder::CreatePointerCast> );
 		//pIRBuilder.addMethod("createIntCast", &CastOpMethod<&IRBuilder::CreateIntCast> );
 		pIRBuilder.addMethod("createFPCast", &CastOpMethod<&IRBuilder::CreateFPCast> );
-		// TODO: cast (Value*, Type*) functions
 	}
 
 	static Handle<Value> IRBConstructor(const Arguments& args){
@@ -186,6 +192,14 @@ public:
 		RETURN_INSTR(pValue, self->CreateStore(ptr, val));
 	}
 
+	static Handle<Value> createGEP(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, ptr, 0);
+		ARRAY_UNWRAP_ARG(pValue, llvm::Value, idxList, 1);
+		STRING_ARG(name, 2);
+		RETURN_INSTR(pValue, self->CreateGEP(ptr, idxList, name));
+	}
+
 	static Handle<Value> createCall(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 2);
 		UNWRAP_ARG(pValue, fn, 0);
@@ -199,6 +213,15 @@ public:
 		UNWRAP_ARG(pType, type, 0);
 		STRING_ARG(name, 1);
 		RETURN_INSTR(pPHINode, self->CreatePHI(type, 2, name));
+	}
+
+	static Handle<Value> createSelect(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 3);
+		UNWRAP_ARG(pValue, cond, 0);
+		UNWRAP_ARG(pValue, vtrue, 1);
+		UNWRAP_ARG(pValue, vfalse, 2);
+		STRING_ARG(name, 3);
+		RETURN_INSTR(pValue, self->CreateSelect(cond, vtrue, vfalse, name));
 	}
 
 	typedef llvm::Value* (IRBuilder::*UnaryOpFn)(llvm::Value*, const llvm::Twine&);
