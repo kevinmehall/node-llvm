@@ -17,6 +17,7 @@
         './src/functiontype.cc',
         './src/executionengine.cc',
         './src/functionpassmanager.cc',
+        './src/instructions.cc',
       ],
       'cflags': [
         '-O3',

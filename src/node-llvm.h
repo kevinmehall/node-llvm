@@ -32,7 +32,10 @@ extern Proto<llvm::Type> 		pType;
 extern Proto<llvm::FunctionType> pFunctionType;
 extern Proto<llvm::ExecutionEngine> pExecutionEngine;
 extern Proto<llvm::FunctionPassManager> pFunctionPassManager;
+extern Proto<llvm::PHINode> pPHINode;
 
+// Common constructor for Value and subclasses
+Handle<Value> valueConstructor(const Arguments& args);
 
 // ConstantInt / ConstantFP
 

@@ -1,6 +1,6 @@
 #include "node-llvm.h"
 
-static Handle<Value> valueConstructor(const Arguments& args){
+Handle<Value> valueConstructor(const Arguments& args){
 	ENTER_CONSTRUCTOR_POINTER(pValue, 2);
 	setConst(args.This(), "parent", args[1]);
 	return scope.Close(args.This());

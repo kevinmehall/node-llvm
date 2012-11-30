@@ -30,7 +30,7 @@ public:
 		pIRBuilder.addMethod("createStore", &createStore); // + aligned, volatile
 
 		// TODO: GEP
-		// TODO: special: phi
+		pIRBuilder.addMethod("createPHI", &createPHI);
 
 		// TODO: unary ops
 
@@ -192,6 +192,13 @@ public:
 		ARRAY_UNWRAP_ARG(pValue, llvm::Value, fnargs, 1);
 		STRING_ARG(name, 2);
 		RETURN_INSTR(pValue, self->CreateCall(fn, fnargs, name));
+	}
+
+	static Handle<Value> createPHI(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 1);
+		UNWRAP_ARG(pType, type, 0);
+		STRING_ARG(name, 1);
+		RETURN_INSTR(pPHINode, self->CreatePHI(type, 2, name));
 	}
 
 	typedef llvm::Value* (IRBuilder::*UnaryOpFn)(llvm::Value*, const llvm::Twine&);
