@@ -53,11 +53,20 @@ static Handle<Value> addBasicBlock(const Arguments& args){
 	return scope.Close(args[0]);
 }
 
+static Handle<Value> dump(const Arguments& args){
+	ENTER_METHOD(pFunction, 0);
+	std::string s;
+	llvm::raw_string_ostream stream(s);
+	self->print(stream, NULL);
+	return scope.Close(String::New(stream.str().c_str()));
+}
+
 static void init(Handle<Object> target){
 	pFunction.init(&functionConstructor);
 	pFunction.inherit(pValue);
 
 	pFunction.addMethod("_addBasicBlock", &addBasicBlock);
+	pFunction.addMethod("dump", &dump);
 }
 
 Proto<llvm::Function> pFunction("Function", &init);
