@@ -359,7 +359,7 @@ class Parser
     Body = @ParseExpression()
     if not Body then return null
     
-    return new @VarExprAST(VarNames, Body)
+    return new VarExprAST(VarNames, Body)
 
   # primary
   #   ::= identifierexpr
@@ -478,14 +478,14 @@ class Parser
     while @getNextToken() == tok_identifier
       ArgNames.push(@lexer.val)
     if @curTok != ')'
-      return ErrorP("Expected ')' in prototype")
+      throw new Error("Expected ')' in prototype")
     
     # success.
     @getNextToken()  # eat ')'.
     
     # Verify right number of names for operator.
     if Kind && ArgNames.length != Kind
-      return ErrorP("Invalid number of operands for operator")
+      throw new Error("Invalid number of operands for operator")
     
     return new PrototypeAST(FnName, ArgNames, Kind != 0, BinaryPrecedence)
 
@@ -555,14 +555,14 @@ BinaryExprAST::Codegen = ->
   if @op == '='
     # Assignment requires the LHS to be an identifier.
     if @lhs not instanceof VariableExprAST
-      return ErrorV("destination of '=' must be a variable")
+      throw new Error("destination of '=' must be a variable")
     # Codegen the RHS.
     Val = @rhs.Codegen()
     if not Val then return null
 
     # Look up the name.
     Variable = NamedValues[@lhs.name]
-    if Variable == 0 then return ErrorV("Unknown variable name")
+    if not Variable then throw new Error("Unknown variable name")
 
     Builder.createStore(Val, Variable)
     return Val
@@ -755,7 +755,7 @@ VarExprAST::Codegen = ->
   TheFunction = Builder.insertBlock.parent
 
   # Register all variables and emit their initializer.
-  for VarName, Init of @VarNames
+  for VarName, Init of @varNames
     # Emit the initializer before adding the variable to scope, this prevents
     # the initializer from referencing the variable itself, and permits stuff
     # like this:
@@ -778,11 +778,11 @@ VarExprAST::Codegen = ->
     NamedValues[VarName] = Alloca
   
   # Codegen the body, now that all vars are in scope.
-  BodyVal = Body.Codegen()
+  BodyVal = @body.Codegen()
   if not BodyVal then return null
   
   # Pop all our variables from scope.
-  for vn, i in VarNames
+  for vn, i in @varNames
     NamedValues[vn] = OldBindings[i]
 
   # Return the body computation.
