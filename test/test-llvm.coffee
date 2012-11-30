@@ -10,12 +10,15 @@ describe "llvm", ->
 		assert llvm.globalContext instanceof llvm.Context
 
 describe "Context", ->
-	it "can produce double values", ->
-		assert llvm.globalContext.getDouble(99) instanceof llvm.Value
+	it "has basic types", ->
+		assert llvm.globalContext.doubleTy instanceof llvm.FPType
+		assert llvm.globalContext.int1Ty instanceof llvm.IntegerType
+		assert llvm.globalContext.int8Ty instanceof llvm.IntegerType
+		assert llvm.globalContext.int32Ty instanceof llvm.IntegerType
 
 describe "FunctionType", ->
 	it "can be created by a context", ->
-		double = llvm.globalContext.getDoubleTy()
+		double = llvm.globalContext.doubleTy
 		ft = llvm.globalContext.getFunctionType(double, [double])
 		assert ft instanceof llvm.FunctionType
 
@@ -23,7 +26,7 @@ makeModule = ->
 	new llvm.Module("myModName", llvm.globalContext)
 
 makeFn = (module, name="foo") ->
-	double = llvm.globalContext.getDoubleTy()
+	double = llvm.globalContext.doubleTy
 	ft = llvm.globalContext.getFunctionType(double, [double])
 	module.getOrInsertFunction(name, ft)
 	
@@ -82,7 +85,7 @@ describe "IRBuilder", ->
 		a1.name = 'n'
 		assert.equal a1.name, 'n'
 
-		v = b.createFAdd(a1, ctx.getDouble(5), "b")
+		v = b.createFAdd(a1, ctx.doubleTy.const(5), "b")
 		assert.equal v.name, "b"
 
 		b.createRet(v)

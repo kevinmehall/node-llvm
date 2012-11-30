@@ -520,7 +520,7 @@ TheModule = null
 Builder = new llvm.IRBuilder(llvm.globalContext)
 NamedValues = {}
 TheFPM = null
-doubleTy = llvm.globalContext.getDoubleTy()
+doubleTy = llvm.globalContext.doubleTy
 
 # CreateEntryBlockAlloca - Create an alloca instruction in the entry block of
 # the function.  This is used for mutable variables etc.
@@ -530,7 +530,7 @@ CreateEntryBlockAlloca = (TheFunction, VarName) ->
   TmpB.createAlloca(doubleTy, 0, VarName)
 
 NumberExprAST::Codegen = ->
-  return Context.getDouble(@val)
+  return doubleTy.const(@val)
 
 VariableExprAST::Codegen = ->
   # Look this variable up in the function.
@@ -612,7 +612,7 @@ IfExprAST::Codegen = ->
   if not CondV then return null
   
   # Convert condition to a bool by comparing equal to 0.0.
-  CondV = Builder.createFCmpONE(CondV, Context.getDouble(0.0), "ifcond")
+  CondV = Builder.createFCmpONE(CondV, doubleTy.const(0.0), "ifcond")
   
   TheFunction = Builder.insertBlock.parent
   
@@ -715,7 +715,7 @@ ForExprAST::Codegen = ->
     if not StepVal then return null
   else
     # If not specified, use 1.0.
-    StepVal = Context.getDouble(1.0)
+    StepVal = doubleTy.const(1.0)
   
   # Compute the end condition.
   EndCond = @end.Codegen()
@@ -728,7 +728,7 @@ ForExprAST::Codegen = ->
   Builder.createStore(NextVar, Alloca)
   
   # Convert condition to a bool by comparing equal to 0.0.
-  EndCond = Builder.createFCmpONE(EndCond, Context.getDouble(0.0), "loopcond")
+  EndCond = Builder.createFCmpONE(EndCond, doubleTy.const(0.0), "loopcond")
   
   # Create the "after loop" block and insert it.
   AfterBB = TheFunction.addBasicBlock(new llvm.BasicBlock(Context, "afterloop"))
@@ -746,7 +746,7 @@ ForExprAST::Codegen = ->
     delete NamedValues[@varName]
   
   # for expr always returns 0.0.
-  return Context.getDouble(0.0) #Constant::getNullValue(Type::getDoubleTy(getGlobalContext()))
+  return doubleTy.const(0.0) #Constant::getNullValue(Type::getDoubleTy(getGlobalContext()))
 
 
 VarExprAST::Codegen = ->
@@ -765,7 +765,7 @@ VarExprAST::Codegen = ->
       InitVal = Init.Codegen()
       if not InitVal then return null
     else # If not specified, use 0.0.
-      InitVal = Context.getDouble(0.0)
+      InitVal = doubleTy.const(0.0)
     
     Alloca = CreateEntryBlockAlloca(TheFunction, VarName)
     Builder.createStore(InitVal, Alloca)

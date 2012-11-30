@@ -29,6 +29,8 @@ extern Proto<llvm::BasicBlock>  pBasicBlock;
 extern Proto<IRBuilder>         pIRBuilder;
 extern Proto<llvm::Function>    pFunction;
 extern Proto<llvm::Type> 		pType;
+extern Proto<llvm::IntegerType> pIntegerType;
+extern Proto<llvm::Type> 		pFPType;
 extern Proto<llvm::FunctionType> pFunctionType;
 extern Proto<llvm::ExecutionEngine> pExecutionEngine;
 extern Proto<llvm::FunctionPassManager> pFunctionPassManager;
