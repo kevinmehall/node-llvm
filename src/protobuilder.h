@@ -98,7 +98,7 @@ public:
 };
 
 inline static void setConst(Handle<Object> obj, const char* const name, Handle<Value> value){
-	obj->Set(String::NewSymbol(name), value, CONST_PROP);
+	obj->ForceSet(String::NewSymbol(name), value, CONST_PROP);
 }
 
 #define ENTER_CONSTRUCTOR(MIN_ARGS) \
