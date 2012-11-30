@@ -56,7 +56,11 @@ class Lexer
     else
       EOF
 
-  testchar: -> @buffer[0]
+  testchar: ->
+    if @buffer.length
+      @buffer[0]
+    else
+      EOF
 
   # gettok - Return the next token from standard input.
   gettok: ->
@@ -162,7 +166,7 @@ class PrototypeAST
   isUnaryOp:  -> @isOperator and @args.length == 1
   isBinaryOp: -> @isOperator and @args.length == 2
   getOperatorName: ->
-    assert(@isUnaryOp() or @isBinaryOp())
+    console.assert(@isUnaryOp() or @isBinaryOp())
     @name
 
   createArgumentAllocas: (f) ->
@@ -446,29 +450,29 @@ class Parser
       when tok_unary
         @getNextToken()
         if !isascii(@curTok)
-          return ErrorP("Expected unary operator")
+          throw new Error("Expected unary operator")
         FnName = "unary" + @curTok
         Kind = 1
         @getNextToken()
       when tok_binary
         @getNextToken()
         if !isascii(@curTok)
-          return ErrorP("Expected binary operator")
+          return Error("Expected binary operator")
         FnName = "binary" + @curTok
         Kind = 2
         @getNextToken()
         
         # Read the precedence if present.
         if @curTok == tok_number
-          if NumVal < 1 || NumVal > 100
-            return ErrorP("Invalid precedence: must be 1..100")
-          BinaryPrecedence = NumVal
+          if @lexer.value < 1 || @lexer.value > 100
+            throw new Error("Invalid precedence: must be 1..100")
+          BinaryPrecedence = @lexer.value
           @getNextToken()
       else
-        return ErrorP("Expected function name in prototype")
+        throw new Error("Expected function name in prototype")
 
     if @curTok != '('
-      return ErrorP("Expected '(' in prototype")
+      throw new Error("Expected '(' in prototype")
     
     ArgNames = []
     while @getNextToken() == tok_identifier
@@ -480,7 +484,7 @@ class Parser
     @getNextToken()  # eat ')'.
     
     # Verify right number of names for operator.
-    if Kind && ArgNames.size() != Kind
+    if Kind && ArgNames.length != Kind
       return ErrorP("Invalid number of operands for operator")
     
     return new PrototypeAST(FnName, ArgNames, Kind != 0, BinaryPrecedence)
@@ -531,7 +535,7 @@ NumberExprAST::Codegen = ->
 VariableExprAST::Codegen = ->
   # Look this variable up in the function.
   V = NamedValues[@name]
-  if V == 0 then throw new Error("Unknown variable name")
+  if not V then throw new Error("Unknown variable name")
 
   # Load the value.
   return Builder.createLoad(V, @name)
@@ -540,11 +544,11 @@ UnaryExprAST::Codegen = ->
   OperandV = @operand.Codegen()
   if not OperandV then return null
   
-  F = TheModule.getFunction("unary"+@Opcode)
+  F = TheModule.getFunction("unary"+@opcode)
   if not F
     throw new Error("Unknown unary operator")
   
-  return Builder.CreateCall(F, OperandV, "unop")
+  return Builder.createCall(F, [OperandV], "unop")
 
 BinaryExprAST::Codegen = ->
   # Special case '=' because we don't want to emit the LHS as an expression.
@@ -835,7 +839,7 @@ FunctionAST::Codegen = ->
   
   # If this is an operator, install it.
   if @Proto.isBinaryOp()
-    BinopPrecedence[@Proto.getOperatorName()] = @Proto.getBinaryPrecedence()
+    parser.binopPrecedence[@Proto.getOperatorName()] = @Proto.precedence
   
   # Create a new basic block to start insertion into.
   BB = TheFunction.addBasicBlock("entry")
