@@ -92,8 +92,27 @@ public:
 		//CreateICmp (CmpInst::Predicate P, Value *LHS, Value *RHS, const Twine &Name="")
 		//CreateFCmp (CmpInst::Predicate P, Value *LHS, Value *RHS, const Twine &Name="")
 		
-		// TODO: there are more (CmpXXX)
-
+		pIRBuilder.addMethod("createTrunc", &CastOpMethod<&IRBuilder::CreateTrunc> );
+		pIRBuilder.addMethod("createZExt", &CastOpMethod<&IRBuilder::CreateZExt> );
+		pIRBuilder.addMethod("createSExt", &CastOpMethod<&IRBuilder::CreateSExt> );
+		//pIRBuilder.addMethod("createZExtOrTrunc", &CastOpMethod<&IRBuilder::CreateZExtOrTrunc> );
+		//pIRBuilder.addMethod("createSExtOrTrunc", &CastOpMethod<&IRBuilder::CreateSExtOrTrunc> );
+		pIRBuilder.addMethod("createFPToUI", &CastOpMethod<&IRBuilder::CreateFPToUI> );
+		pIRBuilder.addMethod("createFPToSI", &CastOpMethod<&IRBuilder::CreateFPToSI> );
+		pIRBuilder.addMethod("createUIToFP", &CastOpMethod<&IRBuilder::CreateUIToFP> );
+		pIRBuilder.addMethod("createSIToFP", &CastOpMethod<&IRBuilder::CreateSIToFP> );
+		pIRBuilder.addMethod("createFPTrunc", &CastOpMethod<&IRBuilder::CreateFPTrunc> );
+		pIRBuilder.addMethod("createFPExt", &CastOpMethod<&IRBuilder::CreateFPExt> );
+		pIRBuilder.addMethod("createPtrToInt", &CastOpMethod<&IRBuilder::CreatePtrToInt> );
+		pIRBuilder.addMethod("createIntToPtr", &CastOpMethod<&IRBuilder::CreateIntToPtr> );
+		pIRBuilder.addMethod("createBitCast", &CastOpMethod<&IRBuilder::CreateBitCast> );
+		pIRBuilder.addMethod("createZExtOrBitCast", &CastOpMethod<&IRBuilder::CreateZExtOrBitCast> );
+		pIRBuilder.addMethod("createSExtOrBitCast", &CastOpMethod<&IRBuilder::CreateSExtOrBitCast> );
+		pIRBuilder.addMethod("createTruncOrBitCast", &CastOpMethod<&IRBuilder::CreateTruncOrBitCast> );
+		//pIRBuilder.addMethod("createCast", &CastOpMethod<&IRBuilder::CreateCast> );
+		pIRBuilder.addMethod("createPointerCast", &CastOpMethod<&IRBuilder::CreatePointerCast> );
+		//pIRBuilder.addMethod("createIntCast", &CastOpMethod<&IRBuilder::CreateIntCast> );
+		pIRBuilder.addMethod("createFPCast", &CastOpMethod<&IRBuilder::CreateFPCast> );
 		// TODO: cast (Value*, Type*) functions
 	}
 
@@ -178,6 +197,16 @@ public:
 		UNWRAP_ARG(pValue, r, 1);
 		STRING_ARG(name, 2);
 		RETURN_INSTR(pValue, (self->*method)(l, r, name));
+	}
+
+	typedef llvm::Value* (IRBuilder::*CastOpFn)(llvm::Value*, llvm::Type*, const llvm::Twine&);
+	template<CastOpFn method>
+	static Handle<Value> CastOpMethod(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, v, 0);
+		UNWRAP_ARG(pType, t, 1);
+		STRING_ARG(name, 2);
+		RETURN_INSTR(pValue, (self->*method)(v, t, name));
 	}
 };
 Proto<IRBuilder> pIRBuilder("IRBuilder", &jsIRBuilder::init);
