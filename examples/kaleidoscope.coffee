@@ -574,7 +574,7 @@ BinaryExprAST::Codegen = ->
     when '<'
       L = Builder.createFCmpULT(L, R, "cmptmp")
       # Convert bool 0/1 to double 0.0 or 1.0
-      return Builder.CreateUIToFP(L, Type::getDoubleTy(getGlobalContext()), "booltmp")
+      return Builder.createUIToFP(L, doubleTy, "booltmp")
   
   # If it wasn't a builtin binary operator, it must be a user defined one. Emit
   # a call to it.
@@ -604,49 +604,49 @@ CallExprAST::Codegen = ->
   return Builder.createCall(CalleeF, ArgsV, "calltmp")
 
 IfExprAST::Codegen = ->
-  CondV = @Cond.Codegen()
+  CondV = @cond.Codegen()
   if not CondV then return null
   
   # Convert condition to a bool by comparing equal to 0.0.
-  CondV = Builder.CreateFCmpONE(CondV, Context.getDouble(0.0), "ifcond")
+  CondV = Builder.createFCmpONE(CondV, Context.getDouble(0.0), "ifcond")
   
-  TheFunction = Builder.GetInsertBlock().parent
+  TheFunction = Builder.insertBlock.parent
   
   # Create blocks for the then and else cases.
-  ThenBB = new llvm.BasicBlock::Create(llvm.globalContext, "then",)
-  ElseBB = new llvm.BasicBlock::Create(llvm.globalContext, "else")
-  MergeBB = new llvm.BasicBlock::Create(llvm.globalContext, "ifcont")
+  ThenBB = new llvm.BasicBlock(llvm.globalContext, "then",)
+  ElseBB = new llvm.BasicBlock(llvm.globalContext, "else")
+  MergeBB = new llvm.BasicBlock(llvm.globalContext, "ifcont")
   
   # Insert the 'then' block at the end of the function.
   TheFunction.addBasicBlock(ThenBB)
   
-  Builder.CreateCondBr(CondV, ThenBB, ElseBB)
+  Builder.createCondBr(CondV, ThenBB, ElseBB)
   
   # Emit then value.
   Builder.setInsertPoint(ThenBB)
   
-  ThenV = Then.Codegen()
+  ThenV = @then.Codegen()
   if not ThenV then return null
   
-  Builder.CreateBr(MergeBB)
+  Builder.createBr(MergeBB)
   # Codegen of 'Then' can change the current block, update ThenBB for the PHI.
-  ThenBB = Builder.GetInsertBlock()
+  ThenBB = Builder.insertBlock
   
   # Emit else block.
-  TheFunction.getBasicBlockList().push_back(ElseBB)
+  TheFunction.addBasicBlock(ElseBB)
   Builder.setInsertPoint(ElseBB)
   
-  ElseV = Else.Codegen()
+  ElseV = @else.Codegen()
   if not ElseV then return null
   
-  Builder.CreateBr(MergeBB)
+  Builder.createBr(MergeBB)
   # Codegen of 'Else' can change the current block, update ElseBB for the PHI.
-  ElseBB = Builder.GetInsertBlock()
+  ElseBB = Builder.insertBlock
   
   # Emit merge block.
-  TheFunction.getBasicBlockList().push_back(MergeBB)
+  TheFunction.addBasicBlock(MergeBB)
   Builder.setInsertPoint(MergeBB)
-  PN = Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp")
+  PN = Builder.createPHI(doubleTy, "iftmp")
   PN.addIncoming(ThenV, ThenBB)
   PN.addIncoming(ElseV, ElseBB)
   return PN
@@ -675,10 +675,10 @@ ForExprAST::Codegen = ->
   TheFunction = Builder.insertBlock.parent
 
   # Create an alloca for the variable in the entry block.
-  Alloca = CreateEntryBlockAlloca(TheFunction, VarName)
+  Alloca = CreateEntryBlockAlloca(TheFunction, @varName)
   
   # Emit the start code first, without 'variable' in scope.
-  StartVal = Start.Codegen()
+  StartVal = @start.Codegen()
   if not StartVal then return null
   
   # Store the value into the alloca.
@@ -686,63 +686,63 @@ ForExprAST::Codegen = ->
   
   # Make the new basic block for the loop header, inserting after current
   # block.
-  LoopBB = BasicBlock::Create(getGlobalContext(), "loop", TheFunction)
+  LoopBB = TheFunction.addBasicBlock(new llvm.BasicBlock(Context, "loop"))
   
   # Insert an explicit fall through from the current block to the LoopBB.
-  Builder.CreateBr(LoopBB)
+  Builder.createBr(LoopBB)
 
   # Start insertion in LoopBB.
   Builder.setInsertPoint(LoopBB)
   
   # Within the loop, the variable is defined equal to the PHI node.  If it
   # shadows an existing variable, we have to restore it, so save it now.
-  OldVal = NamedValues[VarName]
-  NamedValues[VarName] = Alloca
+  OldVal = NamedValues[@varName]
+  NamedValues[@varName] = Alloca
   
   # Emit the body of the loop.  This, like any other expr, can change the
   # current BB.  Note that we ignore the value computed by the body, but don't
   # allow an error.
-  if not Body.Codegen()
+  if not @body.Codegen()
     return null
   
   # Emit the step value.
-  if Step
-    StepVal = Step.Codegen()
+  if @step
+    StepVal = @step.Codegen()
     if not StepVal then return null
   else
     # If not specified, use 1.0.
     StepVal = Context.getDouble(1.0)
   
   # Compute the end condition.
-  EndCond = End.Codegen()
-  if not EndCond then return EndCond
+  EndCond = @end.Codegen()
+  if not EndCond then return null
   
   # Reload, increment, and restore the alloca.  This handles the case where
   # the body of the loop mutates the variable.
-  CurVar = Builder.createLoad(Alloca, VarName)
+  CurVar = Builder.createLoad(Alloca, @varName)
   NextVar = Builder.createFAdd(CurVar, StepVal, "nextvar")
   Builder.createStore(NextVar, Alloca)
   
   # Convert condition to a bool by comparing equal to 0.0.
-  EndCond = Builder.CreateFCmpONE(EndCond, Context.getDouble(0.0), "loopcond")
+  EndCond = Builder.createFCmpONE(EndCond, Context.getDouble(0.0), "loopcond")
   
   # Create the "after loop" block and insert it.
-  AfterBB = BasicBlock::Create(getGlobalContext(), "afterloop", TheFunction)
+  AfterBB = TheFunction.addBasicBlock(new llvm.BasicBlock(Context, "afterloop"))
   
   # Insert the conditional branch into the end of LoopEndBB.
-  Builder.CreateCondBr(EndCond, LoopBB, AfterBB)
+  Builder.createCondBr(EndCond, LoopBB, AfterBB)
   
   # Any new code will be inserted in AfterBB.
   Builder.setInsertPoint(AfterBB)
   
   # Restore the unshadowed variable.
   if OldVal
-    NamedValues[VarName] = OldVal
+    NamedValues[@varName] = OldVal
   else
-    NamedValues.erase(VarName)
+    delete NamedValues[@varName]
   
   # for expr always returns 0.0.
-  return Constant::getNullValue(Type::getDoubleTy(getGlobalContext()))
+  return Context.getDouble(0.0) #Constant::getNullValue(Type::getDoubleTy(getGlobalContext()))
 
 
 VarExprAST::Codegen = ->
