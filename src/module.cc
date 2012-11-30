@@ -32,7 +32,6 @@ static Handle<Value> getOrInsertFunction(const Arguments& args){
 
 static Handle<Value> dump(const Arguments& args){
 	ENTER_METHOD(pModule, 0);
-
 	std::string s;
 	llvm::raw_string_ostream stream(s);
 	self->print(stream, NULL);

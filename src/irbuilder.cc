@@ -10,11 +10,12 @@ public:
 
 		pIRBuilder.addMethod("createRet", &createRet);
 		pIRBuilder.addMethod("createRetVoid", &createRetVoid);
-		/*pIRBuilder.addMethod("createAggregateRet", &createAggregateRet);
+		//pIRBuilder.addMethod("createAggregateRet", &createAggregateRet);
 
-		pIRBuilder.addMethod("createBr", &createRetVoid);
+		pIRBuilder.addMethod("createBr", &createBr);
 		pIRBuilder.addMethod("createCondBr", &createCondBr);
-		pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
+		
+		/*pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
 		pIRBuilder.addMethod("createIndirectBr", &createIndirectBr);
 		
 		pIRBuilder.addMethod("createUnreachable", &createIndirectBr);
@@ -132,7 +133,7 @@ public:
 		UNWRAP_ARG(pBasicBlock, p, 0); // TODO: could also be Instruction
 		setConst(args.This(), "insertBlock", args[0]);
 		self->SetInsertPoint(p);
-		return args[1];
+		return scope.Close(args[0]);
 	}
 
 	#define RETURN_INSTR(TP, VAL) \
@@ -147,6 +148,20 @@ public:
 	static Handle<Value> createRetVoid(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 0);
 		RETURN_INSTR(pValue, self->CreateRetVoid());
+	}
+
+	static Handle<Value> createBr(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 1);
+		UNWRAP_ARG(pBasicBlock, dest, 0);
+		RETURN_INSTR(pValue, self->CreateBr(dest));
+	}
+
+	static Handle<Value> createCondBr(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 3);
+		UNWRAP_ARG(pValue, cond, 0);
+		UNWRAP_ARG(pBasicBlock, destT, 1);
+		UNWRAP_ARG(pBasicBlock, destF, 2);
+		RETURN_INSTR(pValue, self->CreateCondBr(cond, destT, destF));
 	}
 
 	static Handle<Value> createAlloca(const Arguments& args){
