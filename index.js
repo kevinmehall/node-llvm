@@ -18,10 +18,16 @@ llvm.Function.prototype.addBasicBlock = function (nameOrBlock){
 
 llvm.ExecutionEngine.prototype.getFFIFunction = function(func){
 	if (!ffi) throw new Error("Couldn't load FFI module")
-	var ptr = this.getPointerToFunction(func);
+	var ptr = this.getPointerToFunction(func)
+
+	var args = []
+	for (var i=0; i<func.arguments.length; i++){
+		// TODO: convert other types
+		args.push('double')
+	}
 
 	// TODO: generate types from func.functionType
-	var fn = ffi.ForeignFunction(ptr, 'double', ['double'])
+	var fn = ffi.ForeignFunction(ptr, 'double', args)
 	fn.executionEngine = this; // keep it from being GC'd
 	return fn
 }
