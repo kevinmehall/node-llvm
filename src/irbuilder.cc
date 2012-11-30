@@ -20,12 +20,13 @@ public:
 		pIRBuilder.addMethod("createUnreachable", &createIndirectBr);
 
 		pIRBuilder.addMethod("createInvoke", &createInvoke);
+		*/
 		pIRBuilder.addMethod("createCall", &createCall);
+		
 
 		pIRBuilder.addMethod("createAlloca", &createAlloca);
-		pIRBuilder.addMethod("createLoad", &createLoad); // + aligned
-		pIRBuilder.addMethod("createStore", &createStore); // + aligned
-		*/
+		pIRBuilder.addMethod("createLoad", &createLoad); // + aligned, volatile
+		pIRBuilder.addMethod("createStore", &createStore); // + aligned, volatile
 
 		// TODO: GEP
 		// TODO: special: phi
@@ -127,6 +128,36 @@ public:
 	static Handle<Value> createRetVoid(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 0);
 		RETURN_INSTR(pValue, self->CreateRetVoid());
+	}
+
+	static Handle<Value> createAlloca(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pType, type, 0);
+		auto arraySize = pValue.unwrap(args[1]); // can be null
+		STRING_ARG(name, 2);
+		RETURN_INSTR(pValue, self->CreateAlloca(type, arraySize, name));
+	}
+
+	static Handle<Value> createLoad(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 1);
+		UNWRAP_ARG(pValue, ptr, 0);
+		STRING_ARG(name, 1);
+		RETURN_INSTR(pValue, self->CreateLoad(ptr));
+	}
+
+	static Handle<Value> createStore(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, ptr, 0);
+		UNWRAP_ARG(pValue, val, 1);
+		RETURN_INSTR(pValue, self->CreateStore(ptr, val));
+	}
+
+	static Handle<Value> createCall(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, fn, 0);
+		ARRAY_UNWRAP_ARG(pValue, llvm::Value, fnargs, 1);
+		STRING_ARG(name, 2);
+		RETURN_INSTR(pValue, self->CreateCall(fn, fnargs, name));
 	}
 
 	typedef llvm::Value* (IRBuilder::*UnaryOpFn)(llvm::Value*, const llvm::Twine&);
