@@ -38,9 +38,3 @@ extern Proto<llvm::PHINode> pPHINode;
 
 // Common constructor for Value and subclasses
 Handle<Value> valueConstructor(const Arguments& args);
-
-// ConstantInt / ConstantFP
-
-// Instruction
-//	PHINode
-//	SwitchInstruction
