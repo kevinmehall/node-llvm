@@ -795,22 +795,13 @@ PrototypeAST::Codegen = ->
   
   F = TheModule.getOrInsertFunction(@name, FT, llvm.Function.ExternalLinkage)
   
-  # If F conflicted, there was already something named 'Name'.  If it has a
-  # body, don't allow redefinition or reextern.
-  if F.name != @name
-    # Delete the one we just made and get the existing one.
-    F.eraseFromParent()
-    F = TheModule.getFunction(Name)
-    
-    # If F already has a body, reject this.
-    if F.empty()
-      Error("redefinition of function")
-      return null
-    
-    # If F took a different number of args, reject.
-    if F.arguments.length != Args.length
-      Error("redefinition of function with different # args")
-      return null
+  # If F already has a body, reject this.
+  if F.basicBlocks.length
+    throw new Error("Redefinition of function")
+
+  # If F took a different number of args, reject.
+  if F.arguments.length != @args.length
+    throw new Error("Redefinition of function with different # args")
   
   # Set names for all arguments.
   for AI, i in F.arguments
