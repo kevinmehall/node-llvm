@@ -47,7 +47,7 @@ static Handle<Value> addTargetDataPass(const Arguments& args){
 	ENTER_METHOD(pFunctionPassManager, 1);
 	STRING_ARG(l, 0);
 	self->add(new llvm::TargetData(l));
-	return Undefined();
+	return scope.Close(args.This());
 }
 
 
@@ -56,7 +56,7 @@ static Handle<Value> addTargetDataPass(const Arguments& args){
 static Handle<Value> add##PASSTYPE(const Arguments& args){ \
 	ENTER_METHOD(pFunctionPassManager, 0); \
 	self->add(llvm::create##PASSTYPE()); \
-	return Undefined(); \
+	return scope.Close(args.This()); \
 }
 
 PASSFN(BasicAliasAnalysisPass);

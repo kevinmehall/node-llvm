@@ -105,8 +105,9 @@ describe "IRBuilder", ->
 		pm = new llvm.FunctionPassManager(m)
 
 		pm.addTargetDataPass('')
-		pm.addBasicAliasAnalysisPass()
-		pm.doInitialization()
+		  .addBasicAliasAnalysisPass()
+		  .doInitialization()
+		  
 		pm.run(fn)
 		
 		fnWrapped = engine.getFFIFunction(fn)
