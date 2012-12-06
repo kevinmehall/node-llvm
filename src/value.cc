@@ -17,8 +17,18 @@ void setValueName(Local<String> property, Local<Value> value, const AccessorInfo
 		self->setName(*String::Utf8Value(value->ToString()));
 }
 
+static Handle<Value> dump(const Arguments& args){
+	ENTER_METHOD(pValue, 0);
+	std::string s;
+	llvm::raw_string_ostream stream(s);
+	self->print(stream, NULL);
+	return scope.Close(String::New(stream.str().c_str()));
+}
+
 static void init(Handle<Object> target){
 	pValue.init(&valueConstructor);
+
+	pValue.addMethod("dump", &dump);
 
 	pValue.addAccessor("name", &getValueName, &setValueName);
 }

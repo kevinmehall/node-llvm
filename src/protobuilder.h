@@ -133,7 +133,7 @@ inline static void setConst(Handle<Object> obj, const char* const name, Handle<V
 
 #define STRING_ARG(NAME, N) \
 	std::string NAME; \
-	if (args.Length() > N-1){ \
+	if (args.Length() > N){ \
 		if (!args[N]->IsString()) \
 			THROW_BAD_ARGS("Parameter " #NAME " (" #N ") should be string"); \
 		NAME = *String::Utf8Value(args[N]->ToString()); \
@@ -148,6 +148,14 @@ inline static void setConst(Handle<Object> obj, const char* const name, Handle<V
 	if (!args[N]->IsNumber()) \
 		THROW_BAD_ARGS("Parameter " #NAME " (" #N ") should be number"); \
 	int NAME = args[N]->ToInt32()->Value();
+
+#define BOOL_ARG(NAME, N) \
+	bool NAME = false;    \
+	if (args.Length() > N){ \
+		if (!args[N]->IsBoolean()) \
+			THROW_BAD_ARGS("Parameter " #NAME " (" #N ") should be bool"); \
+		NAME = args[N]->ToBoolean()->Value(); \
+	}
 
 #define ARRAY_UNWRAP_ARG(PROTO, TP, NAME, ARGNO)                                \
 	if (!args[ARGNO]->IsArray())                                             \

@@ -16,6 +16,10 @@ describe "Context", ->
 		assert llvm.globalContext.int8Ty instanceof llvm.IntegerType
 		assert llvm.globalContext.int32Ty instanceof llvm.IntegerType
 
+describe "Type", ->
+	it "can get a pointer type", ->
+		assert.ok llvm.globalContext.int8Ty.getPointerTo() instanceof llvm.Type
+
 describe "FunctionType", ->
 	it "can be created by a context", ->
 		double = llvm.globalContext.doubleTy
@@ -72,8 +76,53 @@ describe "BasicBlock", ->
 		assert.equal bb.name, "bbName"
 
 describe "IRBuilder", ->
+	ctx = llvm.globalContext
+	module = null
+	b = null
+	v = null # a value
+	p = null # a pointer
+	x = null # a value that can't be constant-folded
+
+	it "can be created", ->
+		module = makeModule()
+		fn = makeFn(module)
+		bb = fn.addBasicBlock("entry")
+		b = new llvm.IRBuilder(ctx)
+		b.setInsertPoint(bb)
+		v = ctx.int32Ty.const(123)
+
+	it 'creates cast ops', ->
+		p = b.createIntToPtr(v, ctx.int32Ty.getPointerTo())
+
+	it 'creates load ops', ->
+		x = b.createLoad(p, "x")
+		assert.equal x.dump(), "  %x = load i32* inttoptr (i32 123 to i32*)"
+
+	it 'creates store ops', ->
+		assert.equal b.createStore(p, v).dump(), "  store i32* inttoptr (i32 123 to i32*), i32 123"
+
+	it "creates binary ops", ->
+		assert.equal b.createNSWAdd(v, x).dump(), "  %1 = add nsw i32 123, %x"
+		assert.equal b.createNSWAdd(v, x, "add1").dump(), "  %add1 = add nsw i32 123, %x"
+
+	it "creates binary ops that take NUW and NSW", ->
+		assert.equal b.createAdd(v, x, "add2").dump(), "  %add2 = add i32 123, %x"
+		assert.equal b.createAdd(v, x, "add3", true, true).dump(), "  %add3 = add nuw nsw i32 123, %x"
+
+	it "creates unary ops", ->
+		#assert.equal b.createNeg(x, "neg1").dump(), "  %neg1 = neg i32 %x"
+		assert.equal b.createNSWNeg(x, "neg1").dump(), "  %neg1 = sub nsw i32 0, %x"
+
+	it "creates allocas", ->
+		assert.equal b.createAlloca(ctx.doubleTy, null, "al1").dump(), "  %al1 = alloca double"
+		assert.equal b.createAlloca(ctx.doubleTy, v, "al2").dump(), "  %al2 = alloca double, i32 123"
+
+	it "creates calls"
+
+	it "creates GEP", ->
+		assert.equal b.createGEP(p, [x], "gep").dump(), "  %gep = getelementptr i32* inttoptr (i32 123 to i32*), i32 %x"
+
 	it "can build a function", ->
-		ctx = llvm.globalContext
 		m = makeModule()
 		fn = makeFn(m)
 		bb = fn.addBasicBlock("entry")

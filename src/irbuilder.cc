@@ -32,18 +32,17 @@ public:
 		pIRBuilder.addMethod("createPHI", &createPHI);
 		pIRBuilder.addMethod("createSelect", &createSelect);
 
-
 		// bool HasNUW=false, bool HasNSW=false
-		//pIRBuilder.addMethod("createAdd", 	&BinOpWrMethod<&IRBuilder::CreateAdd> );
-		//pIRBuilder.addMethod("createSub", 	&BinOpWrMethod<&IRBuilder::CreateSub> );
-		//pIRBuilder.addMethod("createMul", 	&BinOpWrMethod<&IRBuilder::CreateMul> );
-		//pIRBuilder.addMethod("createShl", 	&BinOpWrMethod<&IRBuilder::CreateShl> );
+		pIRBuilder.addMethod("createAdd", 	&BinOpWrMethod<&IRBuilder::CreateAdd> );
+		pIRBuilder.addMethod("createSub", 	&BinOpWrMethod<&IRBuilder::CreateSub> );
+		pIRBuilder.addMethod("createMul", 	&BinOpWrMethod<&IRBuilder::CreateMul> );
+		pIRBuilder.addMethod("createShl", 	&BinOpWrMethod<&IRBuilder::CreateShl> );
 
 		// bool isExact=false
-		//pIRBuilder.addMethod("createUDiv", 	&BinOpExMethod<&IRBuilder::CreateUDiv> );
-		//pIRBuilder.addMethod("createSDiv", 	&BinOpExMethod<&IRBuilder::CreateSDiv> );
-		//pIRBuilder.addMethod("createLShr", 	&BinOpExMethod<&IRBuilder::CreateLShr> );
-		//pIRBuilder.addMethod("createAShr", 	&BinOpExMethod<&IRBuilder::CreateAShr> );
+		pIRBuilder.addMethod("createUDiv", 	&BinOpExMethod<&IRBuilder::CreateUDiv> );
+		pIRBuilder.addMethod("createSDiv", 	&BinOpExMethod<&IRBuilder::CreateSDiv> );
+		pIRBuilder.addMethod("createLShr", 	&BinOpExMethod<&IRBuilder::CreateLShr> );
+		pIRBuilder.addMethod("createAShr", 	&BinOpExMethod<&IRBuilder::CreateAShr> );
 		
 		pIRBuilder.addMethod("createNSWAdd", 	&BinOpMethod<&IRBuilder::CreateNSWAdd> );
 		pIRBuilder.addMethod("createNUWAdd", 	&BinOpMethod<&IRBuilder::CreateNUWAdd> );
@@ -182,7 +181,7 @@ public:
 		ENTER_METHOD(pIRBuilder, 1);
 		UNWRAP_ARG(pValue, ptr, 0);
 		STRING_ARG(name, 1);
-		RETURN_INSTR(pValue, self->CreateLoad(ptr));
+		RETURN_INSTR(pValue, self->CreateLoad(ptr, name));
 	}
 
 	static Handle<Value> createStore(const Arguments& args){
@@ -214,7 +213,7 @@ public:
 		STRING_ARG(name, 1);
 		RETURN_INSTR(pPHINode, self->CreatePHI(type, 2, name));
 	}
-	
+
 	static Handle<Value> createSelect(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 3);
 		UNWRAP_ARG(pValue, cond, 0);
@@ -242,6 +241,29 @@ public:
 		UNWRAP_ARG(pValue, r, 1);
 		STRING_ARG(name, 2);
 		RETURN_INSTR(pValue, (self->*method)(l, r, name));
+	}
+
+	typedef llvm::Value* (IRBuilder::*BinaryOpWrFn)(llvm::Value*, llvm::Value*, const llvm::Twine&, bool, bool);
+	template<BinaryOpWrFn method>
+	static Handle<Value> BinOpWrMethod(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, l, 0);
+		UNWRAP_ARG(pValue, r, 1);
+		STRING_ARG(name, 2);
+		BOOL_ARG(hasNUW, 3);
+		BOOL_ARG(hasNSW, 4);
+		RETURN_INSTR(pValue, (self->*method)(l, r, name, hasNUW, hasNSW));
+	}
+
+	typedef llvm::Value* (IRBuilder::*BinaryOpExFn)(llvm::Value*, llvm::Value*, const llvm::Twine&, bool);
+	template<BinaryOpExFn method>
+	static Handle<Value> BinOpExMethod(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, l, 0);
+		UNWRAP_ARG(pValue, r, 1);
+		STRING_ARG(name, 2);
+		BOOL_ARG(isExact, 3);
+		RETURN_INSTR(pValue, (self->*method)(l, r, name, isExact));
 	}
 
 	typedef llvm::Value* (IRBuilder::*CastOpFn)(llvm::Value*, llvm::Type*, const llvm::Twine&);

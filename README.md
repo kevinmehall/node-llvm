@@ -53,6 +53,7 @@ For details, see the LLVM [C++ API documentation](http://llvm.org/doxygen/index.
 
 **.parent**  
 **.name** [r/w]  
+**.dump()**  
 
 ### Function
 
@@ -114,6 +115,17 @@ The following methods create an instruction and add it at the current insertion 
 **.createGEP**(ptr, idxList, [name])  
 **.createPHI**(type, [name]) -- creates PHINode with .addIncoming(block, value)  
 **.createSelect**(cond, vTrue, vFalse)  
+  
+**.createAdd**(l, r, [name], [hasNUW], [hasNSW])  
+**.createSub**(l, r, [name], [hasNUW], [hasNSW])  
+**.createMul**(l, r, [name], [hasNUW], [hasNSW])  
+**.createShl**(l, r, [name], [hasNUW], [hasNSW])  
+ 
+**.createUDiv**(l, r, [name], [isExact])  
+**.createSDiv**(l, r, [name], [isExact])  
+**.createLShr**(l, r, [name], [isExact])  
+**.createAShr**(l, r, [name], [isExact])  
+ 
 **.createNSWAdd**(l, r, [name])  
 **.createNUWAdd**(l, r, [name])  
 **.createFAdd**(l, r, [name])  
@@ -132,6 +144,7 @@ The following methods create an instruction and add it at the current insertion 
 **.createAnd**(l, r, [name])  
 **.createOr**(l, r, [name])  
 **.createXor**(l, r, [name])  
+ 
 **.createICmpEQ**(l, r, [name])  
 **.createICmpNE**(l, r, [name])  
 **.createICmpUGT**(l, r, [name])  
@@ -156,12 +169,14 @@ The following methods create an instruction and add it at the current insertion 
 **.createFCmpULT**(l, r, [name])  
 **.createFCmpULE**(l, r, [name])  
 **.createFCmpUNE**(l, r, [name])  
+
 **.createNSWNeg**(v, [name])  
 **.createNUWNeg**(v, [name])  
 **.createFNeg**(v, [name])  
 **.createNot**(v, [name])  
 **.createIsNull**(v, [name])  
 **.createIsNotNull**(v, [name])  
+
 **.createTrunc**(v, type, [name])  
 **.createZExt**(v, type, [name])  
 **.createSExt**(v, type, [name])  
