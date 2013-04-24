@@ -1,6 +1,6 @@
 {
   'variables': {
-    "llvm_config": "llvm-config-3.0",
+    "llvm_config": "llvm-config",
   },
   'targets': [  
     {

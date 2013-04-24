@@ -15,10 +15,10 @@ public:
 		pIRBuilder.addMethod("createBr", &createBr);
 		pIRBuilder.addMethod("createCondBr", &createCondBr);
 		
-		//IRBuilder.addMethod("createSwitch", &createSwitch); // special type
+		//pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
 		//pIRBuilder.addMethod("createIndirectBr", &createIndirectBr);
 		
-		//pIRBuilder.addMethod("createUnreachable", &createIndirectBr);
+		//pIRBuilder.addMethod("createUnreachable", &createUnreachable);
 
 		//pIRBuilder.addMethod("createInvoke", &createInvoke);
 		pIRBuilder.addMethod("createCall", &createCall);
@@ -46,19 +46,19 @@ public:
 		
 		pIRBuilder.addMethod("createNSWAdd", 	&BinOpMethod<&IRBuilder::CreateNSWAdd> );
 		pIRBuilder.addMethod("createNUWAdd", 	&BinOpMethod<&IRBuilder::CreateNUWAdd> );
-		pIRBuilder.addMethod("createFAdd", 		&BinOpMethod<&IRBuilder::CreateFAdd> ); // MDNode *FPMathTag=0)
+		pIRBuilder.addMethod("createFAdd", 		&BinOpMDMethod<&IRBuilder::CreateFAdd> ); // MDNode *FPMathTag=0)
 		pIRBuilder.addMethod("createNSWSub", 	&BinOpMethod<&IRBuilder::CreateNSWSub> );
 		pIRBuilder.addMethod("createNUWSub", 	&BinOpMethod<&IRBuilder::CreateNUWSub> );
-		pIRBuilder.addMethod("createFSub", 		&BinOpMethod<&IRBuilder::CreateFSub> ); // MDNode *FPMathTag=0)
+		pIRBuilder.addMethod("createFSub", 		&BinOpMDMethod<&IRBuilder::CreateFSub> ); // MDNode *FPMathTag=0)
 		pIRBuilder.addMethod("createNSWMul", 	&BinOpMethod<&IRBuilder::CreateNSWMul> );
 		pIRBuilder.addMethod("createNUWMul", 	&BinOpMethod<&IRBuilder::CreateNUWMul> );
-		pIRBuilder.addMethod("createFMul", 		&BinOpMethod<&IRBuilder::CreateFMul> ); // MDNode *FPMathTag=0)
+		pIRBuilder.addMethod("createFMul", 		&BinOpMDMethod<&IRBuilder::CreateFMul> ); // MDNode *FPMathTag=0)
 		pIRBuilder.addMethod("createExactUDiv", &BinOpMethod<&IRBuilder::CreateExactUDiv> );
 		pIRBuilder.addMethod("createExactSDiv", &BinOpMethod<&IRBuilder::CreateExactSDiv> );
-		pIRBuilder.addMethod("createFDiv", 		&BinOpMethod<&IRBuilder::CreateFDiv> ); // MDNode *FPMathTag=0)
+		pIRBuilder.addMethod("createFDiv", 		&BinOpMDMethod<&IRBuilder::CreateFDiv> ); // MDNode *FPMathTag=0)
 		pIRBuilder.addMethod("createURem", 		&BinOpMethod<&IRBuilder::CreateURem> );
 		pIRBuilder.addMethod("createSRem", 		&BinOpMethod<&IRBuilder::CreateSRem> );
-		pIRBuilder.addMethod("createFRem", 		&BinOpMethod<&IRBuilder::CreateFRem> ); // MDNode *FPMathTag=0)
+		pIRBuilder.addMethod("createFRem", 		&BinOpMDMethod<&IRBuilder::CreateFRem> ); // MDNode *FPMathTag=0)
 		pIRBuilder.addMethod("createAnd", 		&BinOpMethod<&IRBuilder::CreateAnd> );
 		pIRBuilder.addMethod("createOr", 		&BinOpMethod<&IRBuilder::CreateOr> );
 		pIRBuilder.addMethod("createXor", 		&BinOpMethod<&IRBuilder::CreateXor> );
@@ -91,7 +91,7 @@ public:
 //		pIRBuilder.addMethod("createNeg",       &UnaryOpMethod<&IRBuilder::CreateNeg> ); //  bool HasNUW=false, bool HasNSW=false)
 		pIRBuilder.addMethod("createNSWNeg",    &UnaryOpMethod<&IRBuilder::CreateNSWNeg> );
 		pIRBuilder.addMethod("createNUWNeg",    &UnaryOpMethod<&IRBuilder::CreateNUWNeg> );
-		pIRBuilder.addMethod("createFNeg",      &UnaryOpMethod<&IRBuilder::CreateFNeg> ); // MDNode *FPMathTag=0
+		pIRBuilder.addMethod("createFNeg",      &UnaryOpMDMethod<&IRBuilder::CreateFNeg> ); // MDNode *FPMathTag=0
 		pIRBuilder.addMethod("createNot",       &UnaryOpMethod<&IRBuilder::CreateNot> );
 		pIRBuilder.addMethod("createIsNull",    &UnaryOpMethod<&IRBuilder::CreateIsNull> );
 		pIRBuilder.addMethod("createIsNotNull", &UnaryOpMethod<&IRBuilder::CreateIsNotNull> );
@@ -233,6 +233,16 @@ public:
 		RETURN_INSTR(pValue, (self->*method)(v, name));
 	}
 
+	typedef llvm::Value* (IRBuilder::*UnaryOpMDFn)(llvm::Value*, const llvm::Twine&, llvm::MDNode *FPMathTag);
+	template<UnaryOpMDFn method>
+	static Handle<Value> UnaryOpMDMethod(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 1);
+		UNWRAP_ARG(pValue, v, 0);
+		STRING_ARG(name, 1);
+
+		RETURN_INSTR(pValue, (self->*method)(v, name, 0));
+	}
+
 	typedef llvm::Value* (IRBuilder::*BinaryOpFn)(llvm::Value*, llvm::Value*, const llvm::Twine&);
 	template<BinaryOpFn method>
 	static Handle<Value> BinOpMethod(const Arguments& args){
@@ -241,6 +251,16 @@ public:
 		UNWRAP_ARG(pValue, r, 1);
 		STRING_ARG(name, 2);
 		RETURN_INSTR(pValue, (self->*method)(l, r, name));
+	}
+
+	typedef llvm::Value* (IRBuilder::*BinaryOpMDFn)(llvm::Value*, llvm::Value*, const llvm::Twine&, llvm::MDNode *FPMathTag);
+	template<BinaryOpMDFn method>
+	static Handle<Value> BinOpMDMethod(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, l, 0);
+		UNWRAP_ARG(pValue, r, 1);
+		STRING_ARG(name, 2);
+		RETURN_INSTR(pValue, (self->*method)(l, r, name, 0));
 	}
 
 	typedef llvm::Value* (IRBuilder::*BinaryOpWrFn)(llvm::Value*, llvm::Value*, const llvm::Twine&, bool, bool);

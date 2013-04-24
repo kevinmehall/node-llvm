@@ -1,7 +1,7 @@
 #include "node-llvm.h"
 #include "llvm/Analysis/Verifier.h"
 #include "llvm/Analysis/Passes.h"
-#include "llvm/Target/TargetData.h"
+#include "llvm/DataLayout.h"
 #include "llvm/Transforms/Scalar.h"
 
 static Handle<Value> FPMConstructor(const Arguments& args){
@@ -42,11 +42,10 @@ static Handle<Value> run(const Arguments& args){
 	return scope.Close(Boolean::New(r));
 }
 
-//TODO: TargetData becomes DataLayout in LLVM trunk
-static Handle<Value> addTargetDataPass(const Arguments& args){
+static Handle<Value> addDataLayoutPass(const Arguments& args){
 	ENTER_METHOD(pFunctionPassManager, 1);
 	STRING_ARG(l, 0);
-	self->add(new llvm::TargetData(l));
+	self->add(new llvm::DataLayout(l));
 	return scope.Close(args.This());
 }
 
@@ -71,8 +70,8 @@ static void init(Handle<Object> target){
 	pFunctionPassManager.addMethod("doFinalization", &doFini);
 	pFunctionPassManager.addMethod("run", &run);
 
-	pFunctionPassManager.addMethod("addTargetDataPass", &addTargetDataPass);
-	pFunctionPassManager.addMethod("addDataLayoutPass", &addTargetDataPass); // New name in LLVM trunk
+	pFunctionPassManager.addMethod("addTargetDataPass", &addDataLayoutPass);
+	pFunctionPassManager.addMethod("addDataLayoutPass", &addDataLayoutPass); // New name in LLVM trunk
 	pFunctionPassManager.addMethod("addBasicAliasAnalysisPass", &addBasicAliasAnalysisPass);
 	pFunctionPassManager.addMethod("addInstructionCombiningPass", &addInstructionCombiningPass);
 	pFunctionPassManager.addMethod("addReassociatePass", &addReassociatePass);

@@ -1,9 +1,10 @@
 NodeJS Bindings for LLVM
 ------------------------
 
-Requires LLVM 3.0:
+Requires LLVM 3.2:
 
-	sudo apt-get install libllvm3.0 llvm-3.0-dev
+Ubuntu: `sudo apt-get install libllvm3.2 llvm-3.2-dev`
+Fedora: `sudo yum install llvm llvm-devel llvm-static`
 
   * Wraps the most important LLVM APIs.
   * A port of the LLVM [Kaleidoscope example](http://llvm.org/docs/tutorial/) can be found in `examples/`. Expressions must be entered on a single line.
@@ -210,7 +211,6 @@ Inherits **Value**
 
 The following methods create and add an `llvm::Pass` to the PassManager:
 
-**.addTargetDataPass**(dataLayout) -- LLVM 3.0 name, called DataLayoutPass in LLVM SVN  
 **.addDataLayoutPass**(dataLayout)  
 **.addBasicAliasAnalysisPass**()  
 **.addInstructionCombiningPass**()  
