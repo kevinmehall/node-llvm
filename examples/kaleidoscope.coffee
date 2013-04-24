@@ -167,7 +167,7 @@ class PrototypeAST
   isBinaryOp: -> @isOperator and @args.length == 2
   getOperatorName: ->
     console.assert(@isUnaryOp() or @isBinaryOp())
-    @name
+    @name.slice(-1)
 
   createArgumentAllocas: (f) ->
 
@@ -464,9 +464,9 @@ class Parser
         
         # Read the precedence if present.
         if @curTok == tok_number
-          if @lexer.value < 1 || @lexer.value > 100
+          if @lexer.val < 1 || @lexer.val > 100
             throw new Error("Invalid precedence: must be 1..100")
-          BinaryPrecedence = @lexer.value
+          BinaryPrecedence = @lexer.val
           @getNextToken()
       else
         throw new Error("Expected function name in prototype")
@@ -583,10 +583,10 @@ BinaryExprAST::Codegen = ->
   # If it wasn't a builtin binary operator, it must be a user defined one. Emit
   # a call to it.
   F = TheModule.getFunction("binary"+@op)
-  assert(F, "binary operator not found!")
+  console.assert(F, "binary operator not found!")
   
   Ops = [ L, R ]
-  return Builder.CreateCall(F, Ops, "binop")
+  return Builder.createCall(F, Ops, "binop")
 
 CallExprAST::Codegen = ->
   # Look up the name in the global module table.
