@@ -15,7 +15,7 @@ public:
 		pIRBuilder.addMethod("createBr", &createBr);
 		pIRBuilder.addMethod("createCondBr", &createCondBr);
 		
-		//pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
+		pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
 		//pIRBuilder.addMethod("createIndirectBr", &createIndirectBr);
 		
 		pIRBuilder.addMethod("createUnreachable", &createUnreachable);
@@ -161,17 +161,24 @@ public:
 		RETURN_INSTR(pValue, self->CreateBr(dest));
 	}
 
-	static Handle<Value> createUnreachable(const Arguments& args){
-		ENTER_METHOD(pIRBuilder, 0);
-		RETURN_INSTR(pValue, self->CreateUnreachable());
-	}
-
 	static Handle<Value> createCondBr(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 3);
 		UNWRAP_ARG(pValue, cond, 0);
 		UNWRAP_ARG(pBasicBlock, destT, 1);
 		UNWRAP_ARG(pBasicBlock, destF, 2);
 		RETURN_INSTR(pValue, self->CreateCondBr(cond, destT, destF));
+	}
+
+	static Handle<Value> createSwitch(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 2);
+		UNWRAP_ARG(pValue, v, 0);
+		UNWRAP_ARG(pBasicBlock, defaultDest, 1);
+		RETURN_INSTR(pSwitchInst, self->CreateSwitch(v, defaultDest));
+	}
+
+	static Handle<Value> createUnreachable(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 0);
+		RETURN_INSTR(pValue, self->CreateUnreachable());
 	}
 
 	static Handle<Value> createAlloca(const Arguments& args){

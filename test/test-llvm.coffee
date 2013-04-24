@@ -122,6 +122,52 @@ describe "IRBuilder", ->
 	it "creates GEP", ->
 		assert.equal b.createGEP(p, [x], "gep").dump(), "  %gep = getelementptr i32* inttoptr (i32 123 to i32*), i32 %x"
 
+	it "builds SwitchInsts", ->
+		m = makeModule()
+
+		int = llvm.globalContext.int32Ty
+		ft = llvm.globalContext.getFunctionType(int, [int])
+		fn = m.getOrInsertFunction('testSwitch', ft)
+		b = new llvm.IRBuilder(ctx)
+		
+		entry = b.setInsertPoint fn.addBasicBlock('entry')
+		sw = b.createSwitch(fn.arguments[0], entry)
+
+		one = b.setInsertPoint fn.addBasicBlock('one')
+		b.createRet(int.const(111))
+
+		two = b.setInsertPoint fn.addBasicBlock('two')
+		b.createRet(int.const(222))
+
+		others = b.setInsertPoint fn.addBasicBlock('others')
+		b.createRet(int.const(999))
+
+		sw.setDefaultDest(others)
+		sw.addCase(int.const(1), one)
+		sw.addCase(int.const(2), two)
+
+		assert.equal m.dump(), """
+			; ModuleID = 'myModName'
+
+			define i32 @testSwitch(i32) {
+			entry:
+			  switch i32 %0, label %others [
+			    i32 1, label %one
+			    i32 2, label %two
+			  ]
+
+			one:                                              ; preds = %entry
+			  ret i32 111
+
+			two:                                              ; preds = %entry
+			  ret i32 222
+
+			others:                                           ; preds = %entry
+			  ret i32 999
+			}
+			
+		"""
+
 	it "can build a function", ->
 		m = makeModule()
 		fn = makeFn(m)

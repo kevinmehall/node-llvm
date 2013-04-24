@@ -107,15 +107,16 @@ The following methods create an instruction and add it at the current insertion 
   
 **.createRet**(val)  
 **.createRetVoid**()  
-**.createUnreachable**()  
 **.createBr**(destBlock)  
 **.createCondBr**(cond, destT, destF)  
+**.createSwitch**(V, defaultBlock) -- creates SwitchInst with `.addCase(value, block)` and `.setDefaultDest(block)`  
+**.createUnreachable**()  
 **.createCall**(func, args)  
 **.createAlloca**(type, [arraySize], [name])  
 **.createLoad**(ptr, [name])  
 **.createStore**(ptr, val, [name])  
 **.createGEP**(ptr, idxList, [name])  
-**.createPHI**(type, [name]) -- creates PHINode with .addIncoming(block, value)  
+**.createPHI**(type, [name]) -- creates PHINode with `.addIncoming(block, value)`  
 **.createSelect**(cond, vTrue, vFalse)  
   
 **.createAdd**(l, r, [name], [hasNUW], [hasNSW])  
