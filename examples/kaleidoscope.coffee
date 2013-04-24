@@ -180,13 +180,18 @@ class FunctionAST
 #===----------------------------------------------------------------------===#
 
 class Parser
-  constructor: ->
+  constructor: (@quiet = false) ->
     @lexer = new Lexer()
     @curTok = null
 
     # This holds the precedence for each binary operator that is defined.
     # char -> int
-    @binopPrecedence = {}
+    @binopPrecedence =
+      '=': 2
+      '<': 10
+      '+': 20
+      '-': 20
+      '*': 40  # highest.
 
   # @curTok/getNextToken - Provide a simple token buffer.  @curTok is the current
   # token the parser is looking at.  getNextToken reads another token from the
@@ -822,7 +827,7 @@ PrototypeAST::CreateArgumentAllocas = (F) ->
     # Add arguments to variable symbol table.
     NamedValues[@args[Idx]] = Alloca
 
-FunctionAST::Codegen = ->
+FunctionAST::Codegen = (parser) ->
   NamedValues = {}
   
   TheFunction = @Proto.Codegen()
@@ -864,53 +869,50 @@ FunctionAST::Codegen = ->
 
 TheExecutionEngine = null
 
-HandleDefinition = ->
-  if (F = parser.ParseDefinition())
-    if (LF = F.Codegen())
-      console.log "Read function definition:"
-      console.log LF.dump()
+Parser::HandleDefinition = ->
+  if (F = @ParseDefinition())
+    if (LF = F.Codegen(@))
+      console.log "Read function definition:\n#{LF.dump()}" unless @quiet
   else
     # Skip token for error recovery.
-    getNextToken()
+    @getNextToken()
 
-HandleExtern = ->
-  if (P = parser.ParseExtern())
-    if (F = P.Codegen())
-      console.log "Read extern:"
-      console.log F.dump()
+Parser::HandleExtern = ->
+  if (P = @ParseExtern())
+    if (F = P.Codegen(@))
+      console.log "Read extern: #{F.dump()}" unless @quiet
   else 
     # Skip token for error recovery.
-    getNextToken()
+    @getNextToken()
 
-HandleTopLevelExpression = ->
+Parser::HandleTopLevelExpression = ->
   # Evaluate a top-level expression into an anonymous function.
-  if (F = parser.ParseTopLevelExpr())
-    console.log "parse", F.body.toString()
-    if (LF = F.Codegen())
+  if (F = @ParseTopLevelExpr())
+    console.log "parse", F.body.toString() unless @quiet
+    if (LF = F.Codegen(@))
       # JIT the function, returning a function pointer.
       FP = TheExecutionEngine.getFFIFunction(LF)
-      console.log "Evaluated to", FP()
+      v = FP()
+      console.log "Evaluated to", v unless @quiet
+      return v
   else 
     # Skip token for error recovery.
-    getNextToken()
+    @getNextToken()
 
 # top ::= definition | external | expression | ';'
 # Returns true if the next line is a continuation
-MainExpr = ->
-  switch parser.curTok
+Parser::MainExpr = ->
+  switch @curTok
     when tok_eof then return
-    when ';' then return# ignore top-level semicolons.
-    when tok_def then HandleDefinition()
-    when tok_extern then HandleExtern()
-    else HandleTopLevelExpression()
+    when ';' then return # ignore top-level semicolons.
+    when tok_def then @HandleDefinition()
+    when tok_extern then @HandleExtern()
+    else @HandleTopLevelExpression()
 
-runLine = (done) ->
-  rl.prompt()
-  rl.question 'ready> ', (line) ->
-    parser.lexer.feed(line)
-    parser.getNextToken()
-    MainExpr()
-    runLine(done)
+Parser::runLine = (line) ->
+  @lexer.feed(line)
+  @getNextToken()
+  @MainExpr()
 
 #===----------------------------------------------------------------------===#
 # "Library" functions that can be "extern'd" from user code.
@@ -938,19 +940,6 @@ double printd(double X) {
 
 #InitializeNativeTarget()
 Context = llvm.globalContext
-
-# Install standard binary operators.
-# 1 is lowest precedence.
-parser = new Parser()
-parser.binopPrecedence['='] = 2
-parser.binopPrecedence['<'] = 10
-parser.binopPrecedence['+'] = 20
-parser.binopPrecedence['-'] = 20
-parser.binopPrecedence['*'] = 40  # highest.
-
-rl = readline.createInterface
-  input: process.stdin
-  output: process.stdout
 
 # Make the module, which holds all the code.
 TheModule = new llvm.Module("my cool jit", Context)
@@ -980,9 +969,25 @@ OurFPM.doInitialization()
 # Set the global so the code gen can use this.
 TheFPM = OurFPM
 
-# Run the main "interpreter loop" now.
-runLine ->
-  TheFPM = null
+if module is require.main
+  parser = new Parser()
 
-  # Print out all of the generated code.
-  console.log TheModule.dump()
+  rl = readline.createInterface
+    input: process.stdin
+    output: process.stdout
+
+  # Run the main "interpreter loop" now.
+  runLine = (done) ->
+    rl.prompt()
+    rl.question 'ready> ', (line) ->
+      try
+        parser.runLine(line)
+      catch e
+        console.error e.message
+      runLine(done)
+
+  runLine ->
+    # Print out all of the generated code.
+    console.log TheModule.dump()
+
+exports.Parser = Parser
