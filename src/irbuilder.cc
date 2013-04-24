@@ -18,7 +18,7 @@ public:
 		//pIRBuilder.addMethod("createSwitch", &createSwitch); // special type
 		//pIRBuilder.addMethod("createIndirectBr", &createIndirectBr);
 		
-		//pIRBuilder.addMethod("createUnreachable", &createUnreachable);
+		pIRBuilder.addMethod("createUnreachable", &createUnreachable);
 
 		//pIRBuilder.addMethod("createInvoke", &createInvoke);
 		pIRBuilder.addMethod("createCall", &createCall);
@@ -159,6 +159,11 @@ public:
 		ENTER_METHOD(pIRBuilder, 1);
 		UNWRAP_ARG(pBasicBlock, dest, 0);
 		RETURN_INSTR(pValue, self->CreateBr(dest));
+	}
+
+	static Handle<Value> createUnreachable(const Arguments& args){
+		ENTER_METHOD(pIRBuilder, 0);
+		RETURN_INSTR(pValue, self->CreateUnreachable());
 	}
 
 	static Handle<Value> createCondBr(const Arguments& args){

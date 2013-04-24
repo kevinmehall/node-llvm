@@ -107,6 +107,7 @@ The following methods create an instruction and add it at the current insertion 
   
 **.createRet**(val)  
 **.createRetVoid**()  
+**.createUnreachable**()  
 **.createBr**(destBlock)  
 **.createCondBr**(cond, destT, destF)  
 **.createCall**(func, args)  
