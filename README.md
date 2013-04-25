@@ -3,13 +3,13 @@ NodeJS Bindings for LLVM
 
 Requires LLVM 3.2:
 
-Ubuntu: `sudo apt-get install libllvm3.2 llvm-3.2-dev`
+Ubuntu: `sudo apt-get install libllvm3.2 llvm-3.2-dev`  
 Fedora: `sudo yum install llvm llvm-devel llvm-static`
 
   * Wraps the most important LLVM APIs.
   * A port of the LLVM [Kaleidoscope example](http://llvm.org/docs/tutorial/) can be found in `examples/`. Expressions must be entered on a single line.
   * Uses [Node-FFI](https://github.com/rbranson/node-ffi) to make JIT functions callable from JS. (Currently assumes all arguments and return types are `double` -- fix `index.js`)
-
+  * Currently does not free LLVM objects' memory when a Module is GC'd.
 
 ## API: llvm
 
@@ -202,6 +202,11 @@ The following methods create an instruction and add it at the current insertion 
 Inherits **Value**
 
 **.addIncoming**(value, block)  
+
+### SwitchInst
+
+**.addCase**(value, block)  
+**.setDefaultDest**(block)  
 
 ### FunctionPassManager
 
