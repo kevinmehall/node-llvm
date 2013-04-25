@@ -114,7 +114,7 @@ The following methods create an instruction and add it at the current insertion 
 **.createCall**(func, args)  
 **.createAlloca**(type, [arraySize], [name])  
 **.createLoad**(ptr, [name])  
-**.createStore**(ptr, val, [name])  
+**.createStore**(val, ptr, [name])  
 **.createGEP**(ptr, idxList, [name])  
 **.createPHI**(type, [name]) -- creates PHINode with `.addIncoming(block, value)`  
 **.createSelect**(cond, vTrue, vFalse)  

@@ -198,9 +198,9 @@ public:
 
 	static Handle<Value> createStore(const Arguments& args){
 		ENTER_METHOD(pIRBuilder, 2);
-		UNWRAP_ARG(pValue, ptr, 0);
-		UNWRAP_ARG(pValue, val, 1);
-		RETURN_INSTR(pValue, self->CreateStore(ptr, val));
+		UNWRAP_ARG(pValue, val, 0);
+		UNWRAP_ARG(pValue, ptr, 1);
+		RETURN_INSTR(pValue, self->CreateStore(val, ptr));
 	}
 
 	static Handle<Value> createGEP(const Arguments& args){
