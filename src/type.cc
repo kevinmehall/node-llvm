@@ -50,7 +50,7 @@ static Handle<Value> fpConst(const Arguments& args){
 
 static void init(Handle<Object> target){
 	pType.init(&typeConstructor);
-	pType.addMethod("getPointerTo", &getPointerTo);
+	pType.addMethod("_getPointerTo", &getPointerTo);
 
 	pIntegerType.init(&typeConstructor);
 	pIntegerType.inherit(pType);

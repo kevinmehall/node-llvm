@@ -33,10 +33,14 @@ static Handle<Value> getFunctionType(const Arguments& args){
 	ENTER_METHOD(pContext, 2);
 	(void) self;
 	UNWRAP_ARG(pType, retType, 0);
-	ARRAY_UNWRAP_ARG(pType, llvm::Type, argTypes, 1);
+	ARRAY_UNWRAP_ARG(pType, llvm::Type, paramTypes, 1);
 
-	auto tp = llvm::FunctionType::get(retType, argTypes, false);
-	return scope.Close(pFunctionType.create(tp, args.This()));
+	auto tp = llvm::FunctionType::get(retType, paramTypes, false);
+	Handle<Object> v8tp = Handle<Object>::Cast(pFunctionType.create(tp, args.This()));
+	setConst(v8tp, "returnType", args[0]);
+	setConst(v8tp, "paramTypes", args[1]);
+
+	return scope.Close(v8tp);
 }
 
 static void init(Handle<Object> target){

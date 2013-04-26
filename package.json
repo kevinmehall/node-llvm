@@ -11,7 +11,9 @@
   "author": "Kevin Mehall <km@kevinmehall.net>, Nonolith Labs, LLC",
   "license": "BSD",
   "dependencies": {
-    "bindings": "~1.0.0"
+    "bindings": "~1.0.0",
+    "ref": "~0.1.3",
+    "ffi": "~1.2.5"
   },
   "devDependencies": {
     "coffee-script": "~1.4.0",

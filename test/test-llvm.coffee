@@ -30,8 +30,8 @@ makeModule = ->
 	new llvm.Module("myModName", llvm.globalContext)
 
 makeFn = (module, name="foo") ->
-	double = llvm.globalContext.doubleTy
-	ft = llvm.globalContext.getFunctionType(double, [double])
+	int = llvm.globalContext.int32Ty
+	ft = llvm.globalContext.getFunctionType(int, [int])
 	module.getOrInsertFunction(name, ft)
 	
 describe "Module", ->
@@ -180,7 +180,7 @@ describe "IRBuilder", ->
 		a1.name = 'n'
 		assert.equal a1.name, 'n'
 
-		v = b.createFAdd(a1, ctx.doubleTy.const(5), "b")
+		v = b.createAdd(a1, ctx.int32Ty.const(5), "b")
 		assert.equal v.name, "b"
 
 		b.createRet(v)
@@ -188,10 +188,10 @@ describe "IRBuilder", ->
 		assert.equal m.dump(), """
 			; ModuleID = 'myModName'
 
-			define double @foo(double %n) {
+			define i32 @foo(i32 %n) {
 			entry:
-			  %b = fadd double %n, 5.000000e+00
-			  ret double %b
+			  %b = add i32 %n, 5
+			  ret i32 %b
 			}
 
 		"""
