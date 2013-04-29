@@ -1,6 +1,6 @@
 {
   "name": "llvm",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Bindings for the LLVM compiler infrastructure",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "valgrind": "valgrind --leak-check=full --show-possibly-lost=no node --expose-gc --trace-gc node_modules/mocha/bin/_mocha -R spec --compilers coffee:coffee-script"
   },
   "repository": "https://github.com/kevinmehall/node-llvm.git",
-  "author": "Kevin Mehall <km@kevinmehall.net>, Nonolith Labs, LLC",
+  "author": "Kevin Mehall <km@kevinmehall.net>",
   "license": "BSD",
   "dependencies": {
     "bindings": "~1.0.0",
