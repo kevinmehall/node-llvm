@@ -9,11 +9,11 @@
 using namespace node;
 using namespace v8;
 
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/IRBuilder.h"
-#include "llvm/BasicBlock.h"
-#include "llvm/Function.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Function.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/PassManager.h"
 #include "llvm/Support/raw_ostream.h"
